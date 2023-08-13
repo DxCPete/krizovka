@@ -1,0 +1,3 @@
+bin/
+obj/
+Directory_log.ldf

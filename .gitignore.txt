@@ -1,3 +1,4 @@
 bin/
 obj/
-Directory_log.ldf
+*.ldf
+*.mdf

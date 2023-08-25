@@ -14,10 +14,9 @@ namespace BAK
         public int width { get; set; }
         public int height { get; set; }
         public Dictionary dictionary;
+        public List<Word> usedWords = new List<Word>();
         public string language { get; set; }
         public int difficulty { get; set; }
-        public Word[] clueHoritonzal;
-        public Word[] clueVertical;
         public List<(string[] containedLetters, bool horizontalDirection)>[][] impossiblePathsList;
 
 
@@ -33,7 +32,7 @@ namespace BAK
                 impossiblePathsList[i] = new List<(string[] containedLetters, bool horizontalDirection)>[height];
                 for (int j = 0; j < height; j++)
                 {
-                    impossiblePathsList[i][j] = new List<(string[] containedLetters, bool horizontalDirection)>(); // můžete zde přidat data
+                    impossiblePathsList[i][j] = new List<(string[] containedLetters, bool horizontalDirection)>();
                 }
             }
 
@@ -126,13 +125,29 @@ namespace BAK
             {
                 for (int i = 0; i < width; i += 1)
                 {
-                    Console.Write(crossword[i, j] + " | ");
                     sb.Append(crossword[i, j] + " | ");
                 }
                 sb.AppendLine();
             }
             Console.WriteLine(sb.ToString());
         }
+
+        public void PrintCs(string[,] cs)
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < height; i += 1)
+            {
+                for (int j = 0; j < width; j += 1)
+                {
+                    sb.Append(cs[j, i] + " | ");
+                }
+
+                sb.AppendLine();
+            }
+            Console.WriteLine(sb.ToString() /*.Replace("clue", "7")*/); //ten replace je na test
+        }
+
+
 
         public string[,] testing()
         {

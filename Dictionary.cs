@@ -59,7 +59,7 @@ namespace BAK
             dictionary = dictionary.GroupBy(w => w.word)
                 .Select(s => s.First())
                 .OrderBy(r => rnd.Next())
-                .ToList(); //vybere jenom unikátní slova
+                .ToList();
         }
 
         public List<Word> SelectWordsTest()
@@ -94,25 +94,39 @@ namespace BAK
         public Word GetRightClue(List<Word> usedWords, string[] wordContains)
         {
             Word word = new Word(string.Concat(wordContains), "");
-           // Word rightWord = (Word)usedWords.Where(w => w.word.Equals(word.word));
-            List<Word> list = usedWords.Where(w => w.word.Equals(word.word)).ToList();            
+            // Word rightWord = (Word)usedWords.Where(w => w.word.Equals(word.word));
+            List<Word> list = usedWords.Where(w => w.word.Equals(word.word)).ToList();
+            if(list.Count <= 0)
+            {
+                return new Word("", "");
+            }
             return list[0];
         }
 
-        public Word SelectWord(int wordLength, string[] wordContains)
+        public Word SelectWord(string[] wordContains, List<Word> usedWords)
         {
-            Word word = new Word(string.Concat(wordContains), "");
-            List<Word> wordsFiltered = dictionary.AsParallel()
-                .Where(w => comparer.Equals(w, word) && w.word.Length < wordLength).Take(10)
+
+            return SelectWord(wordContains, usedWords, 100);
+        }
+
+        public Word SelectWord(string[] wordContains, List<Word> usedWords, int maxLength)
+        {
+            string lettersContained = string.Concat(wordContains);
+            lettersContained = lettersContained.Substring(0, Math.Min(maxLength, lettersContained.Length));
+            Word word = new Word(lettersContained, "");
+            List<Word> wordsFiltered = dictionary.Except(usedWords)
+                .AsParallel()
+                .Where(w => comparer.Equals(w, word) && w.word.Length < maxLength).Take(limit)
                 .ToList();
             if (wordsFiltered.Count == 0)
             {
                 return new Word("", "");
             }
-            int random = new Random().Next(0, wordsFiltered.Count - 1);
-            return wordsFiltered[random];
 
+            Random rnd = new Random();
+            return wordsFiltered[rnd.Next(wordsFiltered.Count)];
         }
+
 
 
         public Word SelectWord(List<Word> usedWords, string[] wordContains)

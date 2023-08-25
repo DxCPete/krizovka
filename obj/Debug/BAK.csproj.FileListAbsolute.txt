@@ -1,0 +1,32 @@
+C:\Users\petro\source\repos\BAK\bin\Debug\BAK.exe.config
+C:\Users\petro\source\repos\BAK\bin\Debug\BAK.exe
+C:\Users\petro\source\repos\BAK\bin\Debug\BAK.pdb
+C:\Users\petro\source\repos\BAK\obj\Debug\BAK.csprojAssemblyReference.cache
+C:\Users\petro\source\repos\BAK\obj\Debug\BAK.csproj.CoreCompileInputs.cache
+C:\Users\petro\source\repos\BAK\obj\Debug\BAK.exe
+C:\Users\petro\source\repos\BAK\obj\Debug\BAK.pdb
+C:\Users\petro\OneDrive\Desktop\BAK\BAK - C#\obj\Debug\BAK.csproj.CoreCompileInputs.cache
+C:\Users\petro\OneDrive\Desktop\BAK\BAK - C#\obj\Debug\BAK.exe
+C:\Users\petro\OneDrive\Desktop\BAK\BAK - C#\obj\Debug\BAK.pdb
+C:\Users\petro\OneDrive\Desktop\BAK\BAK - C#\bin\Debug\BAK.exe.config
+C:\Users\petro\OneDrive\Desktop\BAK\BAK - C#\bin\Debug\BAK.exe
+C:\Users\petro\OneDrive\Desktop\BAK\BAK - C#\bin\Debug\BAK.pdb
+C:\Users\petro\OneDrive\Desktop\BAK\BAK - C#\obj\Debug\BAK.csproj.AssemblyReference.cache
+C:\Users\petro\OneDrive\Desktop\back up\konec května\BAK - C#\bin\Debug\BAK.exe.config
+C:\Users\petro\OneDrive\Desktop\back up\konec května\BAK - C#\bin\Debug\BAK.exe
+C:\Users\petro\OneDrive\Desktop\back up\konec května\BAK - C#\bin\Debug\BAK.pdb
+C:\Users\petro\OneDrive\Desktop\back up\konec května\BAK - C#\obj\Debug\BAK.csproj.AssemblyReference.cache
+C:\Users\petro\OneDrive\Desktop\back up\konec května\BAK - C#\obj\Debug\BAK.csproj.CoreCompileInputs.cache
+C:\Users\petro\OneDrive\Desktop\back up\konec května\BAK - C#\obj\Debug\BAK.exe
+C:\Users\petro\OneDrive\Desktop\back up\konec května\BAK - C#\obj\Debug\BAK.pdb
+C:\Users\petro\OneDrive\Desktop\back up\konec května\BAK - C#\bin\Debug\Dictionary.mdf
+C:\Users\petro\OneDrive\Desktop\back up\konec května\BAK - C#\bin\Debug\Dictionary_log.ldf
+C:\Users\petro\OneDrive\Desktop\BAK - C#\bin\Debug\Directory.mdf
+C:\Users\petro\OneDrive\Desktop\BAK - C#\bin\Debug\Directory_log.ldf
+C:\Users\petro\OneDrive\Desktop\BAK - C#\bin\Debug\BAK.exe.config
+C:\Users\petro\OneDrive\Desktop\BAK - C#\bin\Debug\BAK.exe
+C:\Users\petro\OneDrive\Desktop\BAK - C#\bin\Debug\BAK.pdb
+C:\Users\petro\OneDrive\Desktop\BAK - C#\obj\Debug\BAK.csproj.AssemblyReference.cache
+C:\Users\petro\OneDrive\Desktop\BAK - C#\obj\Debug\BAK.csproj.CoreCompileInputs.cache
+C:\Users\petro\OneDrive\Desktop\BAK - C#\obj\Debug\BAK.exe
+C:\Users\petro\OneDrive\Desktop\BAK - C#\obj\Debug\BAK.pdb

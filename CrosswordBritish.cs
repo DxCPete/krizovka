@@ -7,9 +7,9 @@ namespace BAK
 {
     class CrosswordBritish : Crossword
     {
-        WordComparer comparer = new WordComparer();
         double bestScore = 0.0;
-        double minimumRequiredScore = 22;
+        double lastScore = 0.0;
+        double minimumRequiredScore;
 
         public CrosswordBritish(int x, int y) : base(x, y)
         {
@@ -18,6 +18,7 @@ namespace BAK
 
         public override void Generate()
         {
+            SetMinimumRequiredScore();
             string[,] cs = new string[this.width, this.height];
             for (int i = 0; i < height; i++)
             {
@@ -26,7 +27,6 @@ namespace BAK
                     cs[j, i] = " ";
                 }
             }
-
             while (bestScore < minimumRequiredScore)
             {
                 GenerateCrossword(cs);
@@ -42,7 +42,7 @@ namespace BAK
             bool horizontalDirection;
             for (int y = 0; y < height; y++)
             {
-                for (int x = 0; x < width; x++)
+                for (int x =0; x < width; x++)
                 {
                     for (int k = 0; k < 2; k++)
                     {
@@ -66,6 +66,11 @@ namespace BAK
                 this.usedWords = usedWords;
                 crossword = (string[,])cs.Clone();
             }
+            else if (score < lastScore + 0.5)
+            {
+                return cs;
+            }
+            lastScore = score;
             Console.WriteLine(score);
             PrintCs(cs);
             return cs;
@@ -133,27 +138,31 @@ namespace BAK
                     }
                 }
             }
+            PrintCs(cs);
             if (changed)
             {
                 double score = GetScore(cs);
                 Console.WriteLine(score);
+                if (score < minimumRequiredScore && score < lastScore - 0.5)
+                {
+                    return (cs, usedWords);
+                }
                 if (score < minimumRequiredScore && width * height > 9)
                 {
-                    (string[,], List<Word>) t = FixBigSpaces(cs, usedWords);
+/*                    (string[,], List<Word>, int, int) t = FixBigSpaces(cs, usedWords);
                     cs = t.Item1;
                     usedWords = t.Item2;
-                    PrintCs(cs);
+                    int x = t.Item3;
+                    int y = t.Item4;
+                    if (x < 0) return (cs, usedWords);*/
                     cs = GenerateCrossword(cs);
                 }
             }
             return (cs, usedWords);
         }
 
-        (string[,], List<Word>) FixBigSpaces(string[,] cs, List<Word> usedWords)
+       /* (string[,], List<Word>, int, int) FixBigSpaces(string[,] cs, List<Word> usedWords)
         {
-            // Console.WriteLine("Big Spaces");
-            //PrintCs(cs);
-
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
@@ -166,7 +175,6 @@ namespace BAK
                         int length = t.Item3;
                         if (length > 4)
                         {
-                            Console.WriteLine(x + " " + y);
                             bool horizontalDirection = true;
                             string[] containedLetters = ContainedLetters(cs, x, y, horizontalDirection);
                             Word wordNew = dictionary.SelectWord(containedLetters, usedWords, length);
@@ -174,14 +182,14 @@ namespace BAK
                             {
                                 WordWrite(cs, wordNew, x, y, horizontalDirection);
                                 usedWords.Add(wordNew);
-                                return (cs, usedWords);
+                                return (cs, usedWords, x, y);
                             }
                         }
                     }
                 }
             }
 
-            return (cs, usedWords);
+            return (cs, usedWords, -1, -1);
         }
 
 
@@ -211,7 +219,7 @@ namespace BAK
                 }
             }
             return (-1, -1, -1);
-        }
+        }*/
 
 
         int BigSpaceLength(string[,] cs, int x, int y)
@@ -224,7 +232,7 @@ namespace BAK
             return i;
         }
 
-       
+
         public string[] ContainedLetters(string[,] cs, int x, int y, bool horintalDirection)
         {
             string[] pismena;
@@ -442,16 +450,25 @@ namespace BAK
             return (cs, usedWords);
         }
 
-
-        public void PrintClues()
+        void SetMinimumRequiredScore()
         {
-            for (int i = 0; i < this.usedWords.Count; i++)
+            if (width * height < 100)
             {
-                this.usedWords[i].Print();
+                minimumRequiredScore = 35;
             }
-            
+            else if (width * height < 300)
+            {
+                minimumRequiredScore = 29;
+            }
+            else
+            {
+                minimumRequiredScore = 25;
+            }
+        }
 
-            var t = GetCluesInRightDirection();
+        void PrintClues()
+        {
+            (List<Word>, List<Word>) t = GetCluesInRightDirection();
             List<Word> clueHorizontal = t.Item1;
             List<Word> clueVertical = t.Item2;
             Console.WriteLine("Legenda");
@@ -522,59 +539,6 @@ namespace BAK
             }
             Word word = dictionary.GetRightClue(this.usedWords, letters.ToCharArray().Select(c => c.ToString()).ToArray());
             return word;
-        }
-
-        public (int, int) CountWords()
-        {
-            bool horizontalDir = true;
-            Word word;
-            int countHorizontal = 0;
-            int countVertical = 0;
-            for (int j = 0; j < height; j++)
-            {
-                for (int i = 0; i < width; i++)
-                {
-                    for (int d = 0; d < 2; d++)
-                    {
-                        horizontalDir = !horizontalDir;
-                        word = FindWord(i, j, horizontalDir);
-                        if (word.word.Equals("")) continue;
-                        if (horizontalDir)
-                        {
-                            countHorizontal++;
-                        }
-                        else
-                        {
-                            countVertical++;
-                        }
-                    }
-                }
-            }
-            return (countHorizontal, countHorizontal);
-        }
-
-
-
-        public bool ContainsDira()
-        {
-            if (height < 10 || width < 10) return false;
-            return (Dirka(1, 1) || Dirka(width - width / 3, height - width / 3) || Dirka(width / 2, height / 2) || Dirka(1, height - 6) || Dirka(width - 6, 1));
-        }
-
-        public bool Dirka(int x, int y)
-        {
-            for (int j = y; j < y + height / 3; j++)
-            {
-                for (int i = x; i < x + height / 3; i++)
-                {
-                    if (crossword[i, j] != " ")
-                    {
-                        Console.WriteLine(i + " " + j);
-                        return false;
-                    }
-                }
-            }
-            return true;
         }
     }
 }

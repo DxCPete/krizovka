@@ -7,27 +7,19 @@ namespace BAK
 {
     class WordComparer : IEqualityComparer<Word>
     {
-        /* podle mě jsem to jenom zapomněl smazat dřív
-         * private string value;
-
-
-        public WordComparer(string value)
-        {
-            this.value = value;
-        }*/
         public WordComparer() {
         }
         
-        public bool Equals(Word kandidat, Word obsahuje/*, bool a*/)
+        public bool Equals(Word candidate, Word obsahuje)
         {   
-            if (kandidat.word.Equals(obsahuje.word))
+            if (candidate.word.Equals(obsahuje.word))
             {
                 return true;
             }
             else
             {
                 String[] slovoObsahuje = obsahuje.word.ToCharArray().Select(c => c.ToString()).ToArray(); //převede string na string[]
-                return PouzitelneSlovo(kandidat, slovoObsahuje);
+                return CanUseThisWord(candidate, slovoObsahuje);
             }
         }
 
@@ -45,47 +37,32 @@ namespace BAK
             }
             else
             {
-                return PouzitelneSlovo(kandidat, slovoObsahuje);
+                return CanUseThisWord(kandidat, slovoObsahuje);
             }
         }
 
-        public bool PouzitelneSlovo(Word kandidat, string[] slovoObsahuje)
+        public bool CanUseThisWord(Word candidate, string[] wordContains)
         {
-            int n = kandidat.word.Length;
-            int n2 = slovoObsahuje.Length;
+            int n = candidate.word.Length;
+            int n2 = wordContains.Length;
             if (n > n2) return false;
 
             int i = 0;
-            while (i < n && i < n2 && char.IsLetter(kandidat.word[i]))
+            //Console.WriteLine(candidate.word);
+            while (i < n  && char.IsLetter(candidate.word[i]))
             {
-                //Console.WriteLine(kandidat.slovo[i].ToString() + " " + slovoObsahuje[i]);
-                if (kandidat.word[i].ToString() != slovoObsahuje[i] && slovoObsahuje[i] != "_" )
+               // Console.WriteLine(candidate.word[i].ToString() + " " + wordContains[i]);
+                if (candidate.word[i].ToString() != wordContains[i] && wordContains[i] != "_" )
                 {
                     return false;
                 }
-
                 i++;
             }
-            string[] newA = slovoObsahuje.Skip(i).ToArray();
+           /* string[] newA = wordContains.Skip(i).ToArray();
             int errorCounter = Regex.Matches(string.Concat(newA), @"[\p{Lu}\p{L}ÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]").Count;
             if (errorCounter > 0) return false;
-            return true;
+            */return true;
         }
-
-       /* public bool Equals(Word x, Word y)
-        {
-            if (y.clue.Equals(""))
-            {
-                return Equals(x, y, true);
-            }
-
-            if (Object.ReferenceEquals(x, y)) return true;
-
-            if (Object.ReferenceEquals(x, null) || Object.ReferenceEquals(y, null))
-                return false;
-
-            return x.word == y.word;
-        }*/
 
         public int GetHashCode(Word word)
         {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -22,6 +23,10 @@ namespace BAK
 
         public Crossword(int width, int height)   //pak přidat jazyk
         {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            //Tajenka();
+           
             this.width = width;
             this.height = height;
             dictionary = new Dictionary(Math.Min(width, height));
@@ -46,6 +51,8 @@ namespace BAK
             }
             Generate();
             Print();
+            stopwatch.Stop();
+            Console.WriteLine("Program běžel " + stopwatch.Elapsed);
         }
 
 

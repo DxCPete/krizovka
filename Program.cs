@@ -1,11 +1,12 @@
 ﻿
+
 namespace BAK
 {
     class Program
     {
         static void Main(string[] args)
         {
-            new CrosswordBritish(15,15);
+            new CrosswordBritish(10,10);
         }
     }
 }

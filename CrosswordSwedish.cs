@@ -21,15 +21,11 @@ namespace BAK
 
         public override void Generate()
         {
-
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
             //Tajenka();
             crossword[0, 0] = "X";
             FillBorder(crossword, new List<Word>());
-            stopwatch.Stop();
-            Console.WriteLine("Program běžel " + stopwatch.Elapsed);
-            zapisVysledek(crossword, stopwatch.Elapsed);
+
+            zapisVysledek(crossword);
             Print();
         }
 
@@ -901,7 +897,7 @@ namespace BAK
             return potentionalClue.Contains("clue") || potentionalClue.Contains("7") /*|| potentionalClue.Length > 1*/;
         }
 
-        public void zapisVysledek(string[,] cs, TimeSpan time)
+        public void zapisVysledek(string[,] cs)
         {
 
             string dir = System.Environment.CurrentDirectory;
@@ -918,7 +914,6 @@ namespace BAK
                     }
                     outputFile.WriteLine();
                 }
-                outputFile.WriteLine(time);
             }
             sema.Release();
             zapsano = true;

@@ -105,7 +105,6 @@ namespace BAK
 
         public Word SelectWord(string[] wordContains, List<Word> usedWords)
         {
-
             return SelectWord(wordContains, usedWords, 100);
         }
 
@@ -116,7 +115,7 @@ namespace BAK
             Word word = new Word(lettersContained, "");
             List<Word> wordsFiltered = dictionary.Except(usedWords)
                 .AsParallel()
-                .Where(w => comparer.Equals(w, word) && w.word.Length < maxLength).Take(limit)
+                .Where(w => comparer.Equals(w, word) && w.word.Length < maxLength).Take(5) //limit
                 .ToList();
             if (wordsFiltered.Count == 0)
             {
@@ -135,7 +134,6 @@ namespace BAK
             Word selectedWord = (Word)dictionary.Where(w => comparer.Equals(w, word))
                 .Take(1);
             return selectedWord;
-
         }
 
         public bool ImpossibleToSelect(string containedLetters)

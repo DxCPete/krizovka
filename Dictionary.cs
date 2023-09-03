@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -17,7 +15,7 @@ namespace BAK
         private WordComparer comparer { get; } = new WordComparer();
         static string currentDirectory = System.Environment.CurrentDirectory;
         private string conStr = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=\"" + currentDirectory.Substring(0, currentDirectory.LastIndexOf("bin")) + "Directory.mdf\";Integrated Security=True"; //bude potřeba změnit, když přesunu soubor
-        int limit = 1000;
+        int limit = 100;
 
         public Dictionary(int maxLength)
         {
@@ -115,7 +113,7 @@ namespace BAK
             Word word = new Word(lettersContained, "");
             List<Word> wordsFiltered = dictionary.Except(usedWords)
                 .AsParallel()
-                .Where(w => comparer.Equals(w, word) && w.word.Length < maxLength).Take(5) //limit
+                .Where(w => comparer.Equals(w, word) && w.word.Length < maxLength && w.word.Length > 2).Take(20) //limit
                 .ToList();
             if (wordsFiltered.Count == 0)
             {

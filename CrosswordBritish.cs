@@ -27,9 +27,11 @@ namespace BAK
                     cs[j, i] = " ";
                 }
             }
-            while (bestScore < minimumRequiredScore)
+            int index = 0;
+            while (bestScore < minimumRequiredScore && index < 10)
             {
                 GenerateCrossword(cs);
+                index++;
             }
 
             Console.WriteLine("nejlepší výsledek: " + bestScore);
@@ -42,7 +44,7 @@ namespace BAK
             bool horizontalDirection;
             for (int y = 0; y < height; y++)
             {
-                for (int x =0; x < width; x++)
+                for (int x = 0; x < width; x++)
                 {
                     for (int k = 0; k < 2; k++)
                     {
@@ -149,77 +151,77 @@ namespace BAK
                 }
                 if (score < minimumRequiredScore && width * height > 9)
                 {
-/*                    (string[,], List<Word>, int, int) t = FixBigSpaces(cs, usedWords);
-                    cs = t.Item1;
-                    usedWords = t.Item2;
-                    int x = t.Item3;
-                    int y = t.Item4;
-                    if (x < 0) return (cs, usedWords);*/
+                    /*                    (string[,], List<Word>, int, int) t = FixBigSpaces(cs, usedWords);
+                                        cs = t.Item1;
+                                        usedWords = t.Item2;
+                                        int x = t.Item3;
+                                        int y = t.Item4;
+                                        if (x < 0) return (cs, usedWords);*/
                     cs = GenerateCrossword(cs);
                 }
             }
             return (cs, usedWords);
         }
 
-       /* (string[,], List<Word>, int, int) FixBigSpaces(string[,] cs, List<Word> usedWords)
-        {
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    (int, int, int) t = ContainsBigSpace(cs, x, y);
-                    if (t.Item1 > -1)
-                    {
-                        x = t.Item1;
-                        y = t.Item2;
-                        int length = t.Item3;
-                        if (length > 4)
-                        {
-                            bool horizontalDirection = true;
-                            string[] containedLetters = ContainedLetters(cs, x, y, horizontalDirection);
-                            Word wordNew = dictionary.SelectWord(containedLetters, usedWords, length);
-                            if (!wordNew.word.Equals("") && CanPlace(cs, wordNew, x, y, horizontalDirection))
-                            {
-                                WordWrite(cs, wordNew, x, y, horizontalDirection);
-                                usedWords.Add(wordNew);
-                                return (cs, usedWords, x, y);
-                            }
-                        }
-                    }
-                }
-            }
+        /* (string[,], List<Word>, int, int) FixBigSpaces(string[,] cs, List<Word> usedWords)
+         {
+             for (int y = 0; y < height; y++)
+             {
+                 for (int x = 0; x < width; x++)
+                 {
+                     (int, int, int) t = ContainsBigSpace(cs, x, y);
+                     if (t.Item1 > -1)
+                     {
+                         x = t.Item1;
+                         y = t.Item2;
+                         int length = t.Item3;
+                         if (length > 4)
+                         {
+                             bool horizontalDirection = true;
+                             string[] containedLetters = ContainedLetters(cs, x, y, horizontalDirection);
+                             Word wordNew = dictionary.SelectWord(containedLetters, usedWords, length);
+                             if (!wordNew.word.Equals("") && CanPlace(cs, wordNew, x, y, horizontalDirection))
+                             {
+                                 WordWrite(cs, wordNew, x, y, horizontalDirection);
+                                 usedWords.Add(wordNew);
+                                 return (cs, usedWords, x, y);
+                             }
+                         }
+                     }
+                 }
+             }
 
-            return (cs, usedWords, -1, -1);
-        }
+             return (cs, usedWords, -1, -1);
+         }
 
 
-        (int, int, int) ContainsBigSpace(string[,] cs, int x, int y)
-        {
-            int bigSpaceX = 3;
-            int bigSpaceY = 3;
-            for (; y < height - bigSpaceY; y++)
-            {
-                for (; x < width - bigSpaceX; x++)
-                {
-                    if (cs[x, y] != " ") continue;
-                    bool containsBigSpace = true;
-                    for (int i = 1; i <= bigSpaceX; i++)
-                    {
-                        if (!(y < height - 2 && cs[x + i, y] == " " && cs[x + i, y + 1] == " " && cs[x + i, y + 2] == " "))
-                        {
-                            containsBigSpace = false;
-                            break;
-                        }
-                    }
-                    if (containsBigSpace)
-                    {
+         (int, int, int) ContainsBigSpace(string[,] cs, int x, int y)
+         {
+             int bigSpaceX = 3;
+             int bigSpaceY = 3;
+             for (; y < height - bigSpaceY; y++)
+             {
+                 for (; x < width - bigSpaceX; x++)
+                 {
+                     if (cs[x, y] != " ") continue;
+                     bool containsBigSpace = true;
+                     for (int i = 1; i <= bigSpaceX; i++)
+                     {
+                         if (!(y < height - 2 && cs[x + i, y] == " " && cs[x + i, y + 1] == " " && cs[x + i, y + 2] == " "))
+                         {
+                             containsBigSpace = false;
+                             break;
+                         }
+                     }
+                     if (containsBigSpace)
+                     {
 
-                        return (x, y, BigSpaceLength(cs, x, y));
-                    }
-                }
-            }
-            return (-1, -1, -1);
-        }*/
+                         return (x, y, BigSpaceLength(cs, x, y));
+                     }
+                 }
+             }
+             return (-1, -1, -1);
+         }*/
 
 
         int BigSpaceLength(string[,] cs, int x, int y)

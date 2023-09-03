@@ -13,7 +13,6 @@ namespace BAK
     {
         bool isFinished = false;
         Semaphore sema = new Semaphore(1, 1);
-        bool zapsano = false;
 
         public CrosswordSwedish(int x, int y) : base(x, y)
         {
@@ -56,6 +55,10 @@ namespace BAK
             (int, int, bool) t = StartingCellBorder(currentCs);
             int x = t.Item1;
             int y = t.Item2;
+            if (y == height - 1) //test
+            {
+
+            }
             bool horizontalDirection = t.Item3;
             if (DeadEnd(currentCs, x, y) || DeadEndInner(currentCs, x, y))
             {
@@ -112,7 +115,7 @@ namespace BAK
                 List<Word> usedWordsClone = currentUsedWords.ToList();
                 if (!CanPlaceBorder(csClone, word, x, y, horizontalDirection)) continue;
 
-                WordWrite(csClone, word, x, y, horizontalDirection);
+                csClone = WordWrite(csClone, word, x, y, horizontalDirection);
                 usedWordsClone.Add(word);
 
                 if (x == width - 2 || y == height - 2)
@@ -144,17 +147,23 @@ namespace BAK
         {
             if (IsFinished(currentCs))
             {
-                isFinished = true;
                 PrintCs(currentCs);
                 currentCs = CompleteCsClues(currentCs, currentUsedWords);
                 PrintCs(currentCs);
-                //zapisVysledek(currentCs);
+                if (!IsEverythingAlright(currentCs))
+                {
+                    return;
+                }
+
+                isFinished = true;
+                Console.WriteLine(currentCs[0, 4].Length);
                 crossword = (string[,])currentCs.Clone();
+
                 return;
             }
             if (isFinished) return;
-            if (zapsano) Console.WriteLine("ZAPSANO");
             currentCs = (string[,])GetCsReady(currentCs).Clone();
+            Console.WriteLine("getreadyovano");
 
             PrintCs(currentCs);
             if (!WordCanGoFromHere(currentCs)) return;
@@ -165,8 +174,6 @@ namespace BAK
             y = t.Item2;
             if (x <= 0) //vlastně by to nikdy nemělo nastat
             {
-                //zapisVysledek(currentCs);
-                return;
             }
             bool horizontalDirection = t.Item3;
             string[] containedLetters = ContainedLetters(currentCs, x, y, horizontalDirection);
@@ -187,8 +194,7 @@ namespace BAK
                 if (!DeadEndAlreadyFound(currentCs, x, y, horizontalDirection))
                 {
                     PrintCs(currentCs);
-                    containedLetters = GetMinimumImposibile(containedLetters);
-                    //impossiblePathsListInner.Add((x, y, horizontalDirection, containedLetters));
+                    //containedLetters = GetMinimumImposibile(containedLetters);
                     impossiblePathsList[x][y].Add((containedLetters, horizontalDirection));
                     pocetNesplnitelnychCest++;
                 }
@@ -224,7 +230,8 @@ namespace BAK
 
         public bool BorderIsFull(string[,] cs)
         {
-            return (cs[width - 1, 0].Contains("7") || cs[width - 1, 1].Contains("7")) && (cs[0, height - 1].Contains("7") || cs[1, height - 1].Contains("7") && (IsClue(cs[width - 2, 0]) || IsClue(cs[width - 2, 0])));
+            return (IsClue(cs[width - 1, 0]) || IsClue(cs[width - 1, 1])) && (IsClue(cs[0, height - 1]) || IsClue(cs[1, height - 1])) && 
+                (IsClue(cs[width - 2, 0]) || IsClue(cs[width - 2, 1])) && (IsClue(cs[0, height - 2]) || IsClue(cs[1, height - 2]));
         }
 
         public (int x, int y, bool horintalDirection) StartingCellInside(string[,] cs, int x, int y)
@@ -237,7 +244,7 @@ namespace BAK
                     {
                         if (cs[i, j] == "7/7") return (i, j, true);
                         if (cs[i, j].Contains("/7")) return (i, j, false);
-                        if (cs[i, j] == "7") return (i, j, true);
+                        if (cs[i, j].Contains("7")) return (i, j, true);
                     }
                 }
             }
@@ -325,7 +332,7 @@ namespace BAK
         }
 
 
-        public void WordWrite(string[,] cs, Word word, int x, int y, bool horizontalDirection)
+        public string[,] WordWrite(string[,] cs, Word word, int x, int y, bool horizontalDirection)
         {
             if (!BorderIsFull(cs))
             {
@@ -346,7 +353,7 @@ namespace BAK
                 }
                 if (x + i < width && cs[x + i, y] == " ")
                 {
-                    cs[x + i, y] = "7"; //místo, kde bude další legend
+                    cs[x + i, y] = "7";
                 }
             }
             else
@@ -361,15 +368,50 @@ namespace BAK
                     cs[x, y + i] = "7";
                 }
             }
+            return cs;
         }
 
         public void ClueWriteBorder(string[,] cs, Word slovo, int x, int y, bool horizontalDirection)
         {
+
             if (cs[x, y].Equals(" "))
+            {
+                if (x == 0 || y == 0)
+                {
+                    cs[x, y] = "7";
+                }
+                else if (x == 1 && cs[0, y] != "7")
+                {
+                    cs[x, y] = "7";
+                }
+                else if (y == 1 && cs[x, 0] != "7")
+                {
+                    cs[x, y] = "7";
+                }
+                else if (x != 0 && y != 0)
+                {
+                    cs[x, y] = "clue";
+                }
+                else
+                {
+                    PrintCs(cs);
+                }
+            }
+            else if (cs[x, y] == "7" && x != 0 && y != 0)
+            {
+                cs[x, y] = "clue";
+            }
+            else
+            {
+                PrintCs(cs);
+            }
+
+
+            /*if (cs[x, y].Equals(" "))
             {
                 if (x == 0 || y == 0 || x == width - 1 || y == height - 1)
                 {
-                    cs[x, y] = "7"; // word.clue; PROZATÍM KVŮLI PŘEHLEDNOSTI V KONZOLE
+                    cs[x, y] = "7"; 
                 }
                 else if (x < width - 1 && !cs[x + 1, y].Contains("7") && y < height - 1 && !cs[x, y + 1].Contains("7"))
                 {
@@ -377,7 +419,7 @@ namespace BAK
                 }
                 else cs[x, y] = "7";
             }
-            else if (cs[x, y].Equals("7/7"))
+            else if (cs[x, y].Equals("7/7")) //může to vůbec nastat?
             {
                 if (horizontalDirection)
                 {
@@ -392,6 +434,9 @@ namespace BAK
             {
                 cs[x, y] = "clue";
             }
+            else
+            {
+            }*/
         }
 
         public void ClueWriteInner(string[,] cs, Word slovo, int x, int y, bool horizontalDirection)
@@ -415,6 +460,9 @@ namespace BAK
             else if (cs[x, y].Contains("7"))
             {
                 cs[x, y] = cs[x, y].Replace("7", "clue");
+            }
+            else
+            {
             }
 
         }
@@ -446,16 +494,13 @@ namespace BAK
                         {
                             cs[x, y] += "/7";
                         }
-                        else
-                        {
 
-                        }
                     }
                     else if (cs[x, y] == "7")
                     {
-                        if (x + 1 == width || (x + 1 < width && IsClue(cs[x + 1, y])))
+                        if (x == width - 1)
                         {
-                            cs[x, y] = " ";
+                            cs[x, y] = "/7";
                         }
                         else if (y < height - 1 && x < width - 1 && !IsClue(cs[x, y + 1]) && !IsClue(cs[x + 1, y]))
                         {
@@ -466,7 +511,7 @@ namespace BAK
                             cs[x, y] = "/7";
                         }
                     }
-                    else if (cs[x, y] == "7/7")
+                    /*else if (cs[x, y] == "7/7")
                     {
                         if (x + 1 == width || (x + 1 < width && IsClue(cs[x + 1, y])))
                         {
@@ -480,7 +525,7 @@ namespace BAK
                         {
 
                         }
-                    }
+                    }*/
                 }
             }
             return cs;
@@ -526,14 +571,7 @@ namespace BAK
                         return true;
                     }
                 }
-                /*foreach ((string[] containedLetters, bool horizontalDirection) t in impossiblePathsList[0][j])
-                {
-                    containedLetters = t.Item1;
-                    if (containedLetters.SequenceEqual(currentContainedLetters))
-                    {
-                        return true;
-                    }
-                }*/
+                
             }
             for (int i = Math.Max(1, x); i < width; i++)
             {
@@ -548,14 +586,6 @@ namespace BAK
                         return true;
                     }
                 }
-                /*foreach ((string[] containedLetters, bool horizontalDirection) t in impossiblePathsList[i][0])
-                {
-                    containedLetters = t.Item1;
-                    if (containedLetters.SequenceEqual(currentContainedLetters))
-                    {
-                        return true;
-                    }
-                }*/
             }
             return false;
         }
@@ -572,10 +602,10 @@ namespace BAK
                 {
                     if (x > i && y > j) continue;
                     currentContainedLettersHor = ContainedLetters(cs, i, j, true);
-                    currentContainedLettersHor = GetMinimumImposibile(currentContainedLettersHor);
+                    //currentContainedLettersHor = GetMinimumImposibile(currentContainedLettersHor); //tohle by chtělo líp upravit pro vnitřek
 
                     currentContainedLettersVer = ContainedLetters(cs, i, j, false);
-                    currentContainedLettersVer = GetMinimumImposibile(currentContainedLettersVer);
+                    //currentContainedLettersVer = GetMinimumImposibile(currentContainedLettersVer); 
                     foreach ((string[] containedLetters, bool horizontalDirection) t in impossiblePathsList[i][j])
                     {
                         containedLetters = t.Item1;
@@ -585,7 +615,7 @@ namespace BAK
                         {
                             return true;
                         }
-                        else if (!horizontalDirection && containedLetters.SequenceEqual(currentContainedLettersVer))
+                        else if (!horizontalDirection && containedLetters.SequenceEqual(currentContainedLettersVer)) 
                         {
                             return true;
                         }
@@ -650,7 +680,6 @@ namespace BAK
                     if (!CanPlaceBorder(cs, word, x, y, horizontalDirection)) continue;
                     if (cs[x + word.word.Length, y - 1].Contains("7")) continue;
                     WordWrite(cs, word, x, y, horizontalDirection);
-                    cs[x, y] = "clue";
                     usedWords.Add(word);
                     return (cs, usedWords);
                 }
@@ -670,7 +699,6 @@ namespace BAK
                     if (!CanPlaceBorder(cs, word, x, y, horizontalDirection)) continue;
                     if (cs[x - 1, y + word.word.Length].Contains("7")) continue;
                     WordWrite(cs, word, x, y, horizontalDirection);
-                    cs[x, y] = "clue";
                     usedWords.Add(word);
                     return (cs, usedWords);
                 }
@@ -682,23 +710,21 @@ namespace BAK
         {
             if (x == 0)
             {
-                for (int i = 1; i < height; i++) //najdi si clue v tomto sloupku
+                for (int i = 1; i < width; i++) //najdi si clue v tomto sloupku
                 {
                     if (cs[i, y].Contains("7"))
                     {
-                        x = i;
-                        return (x, y);
+                        return (i, y);
                     }
                 }
             }
             else
             {
-                for (int i = 1; i < width; i++)
+                for (int i = 1; i < height; i++)
                 {
                     if (cs[x, i].Contains("7"))
                     {
-                        y = i;
-                        return (x, y);
+                        return (x, i);
                     }
                 }
             }
@@ -776,23 +802,6 @@ namespace BAK
             return false;
         }
 
-        void PrintCs(string[,] cs)
-        {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < height; i += 1)
-            {
-                for (int j = 0; j < width; j += 1)
-                {
-                    sb.Append(cs[j, i] + " | ");
-                }
-
-                sb.AppendLine();
-            }
-            Console.WriteLine(sb.ToString() /*.Replace("clue", "7")*/); //ten replace je na test
-        }
-
-
-
         public bool IsFinished(string[,] cs)
         {
             for (int j = this.height - 1; j > 0; j--)
@@ -815,6 +824,7 @@ namespace BAK
         public string[,] CompleteCsClues(string[,] cs, List<Word> usedWords)
         {
             cs = CompleteCsCluesBorder(cs, usedWords);
+            if (cs == null) return null;
             cs = CompleteCsCluesInside(cs, usedWords);
             return cs;
         }
@@ -844,9 +854,7 @@ namespace BAK
                     if (word == null) return null;
                     cs[0, i] = word.clue;
                 }
-
             }
-
             return cs;
         }
 
@@ -854,39 +862,38 @@ namespace BAK
         {
             string[] containedLetters;
             Word word;
-            for (int j = 1; j < height; j++)
+            for (int y = 1; y < height; y++)
             {
-                for (int i = 1; i < width; i++)
+                for (int x = 1; x < width; x++)
                 {
-                    if (IsClue(cs[i, j]))
+                    if (IsClue(cs[x, y]))
                     {
-                        if (cs[i, j].Contains("/"))
+                        if (cs[x, y].Contains("/clue"))
                         {
-                            containedLetters = ContainedLetters(cs, i, j, false);
+                            containedLetters = ContainedLetters(cs, x, y, false);
                             word = dictionary.GetRightClue(usedWords, containedLetters);
                             if (word == null)
                             {
                                 word = dictionary.SelectWord(usedWords, containedLetters);
                                 if (word == null) return null;
                             }
-                            cs[i, j] = cs[i, j].Replace("/7", "/" + word.clue);
-
+                            cs[x, y] = cs[x, y].Replace("/clue", "/" + word.clue);
+                            x--;     
+                            PrintCs(cs);
                         }
                         else
                         {
-                            containedLetters = ContainedLetters(cs, i, j, true);
+                            containedLetters = ContainedLetters(cs, x, y, true);
                             word = dictionary.GetRightClue(usedWords, containedLetters);
                             if (word == null)
                             {
                                 word = dictionary.SelectWord(usedWords, containedLetters);
                                 if (word == null) return null;
                             }
-                            cs[i, j] = cs[i, j].Replace("7", word.clue);
+                            cs[x, y] = cs[x, y].Replace("clue", word.clue);
+                            PrintCs(cs);
                         }
-
-
                     }
-
                 }
             }
             return cs;
@@ -895,6 +902,21 @@ namespace BAK
         public bool IsClue(string potentionalClue)
         {
             return potentionalClue.Contains("clue") || potentionalClue.Contains("7") /*|| potentionalClue.Length > 1*/;
+        }
+
+        bool IsEverythingAlright(string[,] cs)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    if (cs[x, y] == " " || IsClue(cs[x, y]))
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
 
         public void zapisVysledek(string[,] cs)
@@ -916,7 +938,6 @@ namespace BAK
                 }
             }
             sema.Release();
-            zapsano = true;
         }
 
     }

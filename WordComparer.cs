@@ -7,11 +7,12 @@ namespace BAK
 {
     class WordComparer : IEqualityComparer<Word>
     {
-        public WordComparer() {
+        public WordComparer()
+        {
         }
-        
+
         public bool Equals(Word candidate, Word obsahuje)
-        {   
+        {
             if (candidate.word.Equals(obsahuje.word))
             {
                 return true;
@@ -26,7 +27,7 @@ namespace BAK
 
         public bool StartsWith(Word kandidat, Word contains)
         {
-            return (kandidat.word.StartsWith(contains.word));            
+            return (kandidat.word.StartsWith(contains.word));
         }
 
         public bool Contains(Word kandidat, string[] slovoObsahuje)
@@ -45,23 +46,28 @@ namespace BAK
         {
             int n = candidate.word.Length;
             int n2 = wordContains.Length;
-            if (n > n2) return false;
+            if (n > n2 || n == n2 - 1) return false;
 
             int i = 0;
             //Console.WriteLine(candidate.word);
-            while (i < n  && char.IsLetter(candidate.word[i]))
+            while (i < n && char.IsLetter(candidate.word[i]))
             {
-               // Console.WriteLine(candidate.word[i].ToString() + " " + wordContains[i]);
-                if (candidate.word[i].ToString() != wordContains[i] && wordContains[i] != "_" )
+                // Console.WriteLine(candidate.word[i].ToString() + " " + wordContains[i]);
+                if (candidate.word[i].ToString() != wordContains[i] && (wordContains[i] != "_" || wordContains[i] == " "))
                 {
                     return false;
                 }
                 i++;
             }
-           /* string[] newA = wordContains.Skip(i).ToArray();
-            int errorCounter = Regex.Matches(string.Concat(newA), @"[\p{Lu}\p{L}ÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]").Count;
-            if (errorCounter > 0) return false;
-            */return true;
+            if (i < n2 && wordContains[i] != "_")
+            {
+                return false;
+            }
+            /* string[] newA = wordContains.Skip(i).ToArray();
+             int errorCounter = Regex.Matches(string.Concat(newA), @"[\p{Lu}\p{L}ÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]").Count;
+             if (errorCounter > 0) return false;
+             */
+            return true;
         }
 
         public int GetHashCode(Word word)

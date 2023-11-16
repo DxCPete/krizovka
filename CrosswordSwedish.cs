@@ -55,10 +55,6 @@ namespace BAK
             (int, int, bool) t = StartingCellBorder(currentCs);
             int x = t.Item1;
             int y = t.Item2;
-            if (y == height - 1) //test
-            {
-
-            }
             bool horizontalDirection = t.Item3;
             if (DeadEnd(currentCs, x, y) || DeadEndInner(currentCs, x, y))
             {
@@ -137,7 +133,7 @@ namespace BAK
                 if (!DeadEndAlreadyFound(currentCs, x, y, horizontalDirection)) //kontrola, že to ještě není uložené na impossiblePathsList
                 {
                     pocetNesplnitelnychCest++;
-                    containedLetters = GetMinimumImposibile(containedLetters);
+                    containedLetters = GetMinimalImposibilePath(containedLetters);
                     impossiblePathsList[x][y].Add((containedLetters, horizontalDirection));
                 }
             }
@@ -163,8 +159,6 @@ namespace BAK
             }
             if (isFinished) return;
             currentCs = (string[,])GetCsReady(currentCs).Clone();
-            Console.WriteLine("getreadyovano");
-
             PrintCs(currentCs);
             if (!WordCanGoFromHere(currentCs)) return;
 
@@ -191,12 +185,16 @@ namespace BAK
 
             if (possibleWords.Count == 0)
             {
-                if (!DeadEndAlreadyFound(currentCs, x, y, horizontalDirection))
+                if (!DeadEndAlreadyFoundInner(currentCs, x, y, horizontalDirection))
                 {
                     PrintCs(currentCs);
                     //containedLetters = GetMinimumImposibile(containedLetters);
-                    impossiblePathsList[x][y].Add((containedLetters, horizontalDirection));
-                    pocetNesplnitelnychCest++;
+                    List<string> impossiblePatterns = FindShortestPossibleMatches(containedLetters);
+                    foreach (string pattern in impossiblePatterns)
+                    {
+                        impossiblePathsList[x][y].Add((pattern.ToCharArray().Select(c => c.ToString()).ToArray(), horizontalDirection));
+                        pocetNesplnitelnychCest++;
+                    }
                 }
                 return;
             }
@@ -230,7 +228,7 @@ namespace BAK
 
         public bool BorderIsFull(string[,] cs)
         {
-            return (IsClue(cs[width - 1, 0]) || IsClue(cs[width - 1, 1])) && (IsClue(cs[0, height - 1]) || IsClue(cs[1, height - 1])) && 
+            return (IsClue(cs[width - 1, 0]) || IsClue(cs[width - 1, 1])) && (IsClue(cs[0, height - 1]) || IsClue(cs[1, height - 1])) &&
                 (IsClue(cs[width - 2, 0]) || IsClue(cs[width - 2, 1])) && (IsClue(cs[0, height - 2]) || IsClue(cs[1, height - 2]));
         }
 
@@ -532,7 +530,7 @@ namespace BAK
         }
 
 
-        string[] GetMinimumImposibile(string[] containedLetters)
+        string[] GetMinimalImposibilePath(string[] containedLetters)
         {
             int i = 0;
             string letters = "";
@@ -562,7 +560,7 @@ namespace BAK
             {
                 currentContainedLetters = ContainedLetters(cs, 0, j, true);
                 if (currentContainedLetters[0] == "_") break;
-                currentContainedLetters = GetMinimumImposibile(currentContainedLetters);
+                currentContainedLetters = GetMinimalImposibilePath(currentContainedLetters);
                 for (int i = impossiblePathsList[0][j].Count - 1; i >= 0; i--)
                 {
                     containedLetters = impossiblePathsList[0][j][i].containedLetters;
@@ -571,13 +569,13 @@ namespace BAK
                         return true;
                     }
                 }
-                
+
             }
             for (int i = Math.Max(1, x); i < width; i++)
             {
                 currentContainedLetters = ContainedLetters(cs, i, 0, false);
                 if (currentContainedLetters[0] == "_") break;
-                currentContainedLetters = GetMinimumImposibile(currentContainedLetters);
+                currentContainedLetters = GetMinimalImposibilePath(currentContainedLetters);
                 for (int j = impossiblePathsList[i][0].Count - 1; j >= 0; j--)
                 {
                     containedLetters = impossiblePathsList[i][0][j].containedLetters;
@@ -590,50 +588,136 @@ namespace BAK
             return false;
         }
 
-        bool DeadEndInner(string[,] cs, int x, int y)
+        bool DeadEndInner(string[,] cs, int x, int y) //NENÍ OTESTOVANÉ POŘÁDNĚ
         {
             string[] containedLetters;
             string[] currentContainedLettersHor;
             string[] currentContainedLettersVer;
             bool horizontalDirection;
+
             for (int j = 1; j < height; j++)
             {
                 for (int i = 1; i < width; i++)
                 {
                     if (x > i && y > j) continue;
                     currentContainedLettersHor = ContainedLetters(cs, i, j, true);
-                    //currentContainedLettersHor = GetMinimumImposibile(currentContainedLettersHor); //tohle by chtělo líp upravit pro vnitřek
 
                     currentContainedLettersVer = ContainedLetters(cs, i, j, false);
-                    //currentContainedLettersVer = GetMinimumImposibile(currentContainedLettersVer); 
                     foreach ((string[] containedLetters, bool horizontalDirection) t in impossiblePathsList[i][j])
                     {
                         containedLetters = t.Item1;
                         horizontalDirection = t.Item2;
+                        if (horizontalDirection && Match(currentContainedLettersHor, containedLetters)) //tyhle podmínky vyměnit za to, jestli jsou containedletters podmnožina currectcontainedLetters
+                        {
+                            Console.WriteLine(string.Join("", currentContainedLettersHor) + " " + string.Join("", containedLetters));
+                            return true;
+                        }
 
-                        if (horizontalDirection && containedLetters.SequenceEqual(currentContainedLettersHor))
+                        else if (!horizontalDirection && Match(currentContainedLettersVer, containedLetters))
                         {
+                            Console.WriteLine(string.Join("", currentContainedLettersVer) + " " + string.Join("", containedLetters));
                             return true;
                         }
-                        else if (!horizontalDirection && containedLetters.SequenceEqual(currentContainedLettersVer)) 
-                        {
-                            return true;
-                        }
+
                     }
                 }
             }
             return false;
         }
 
-        bool DeadEndAlreadyFound(string[,] cs, int x, int y, bool horizontalDirection)
+        public List<string> FindShortestPossibleMatches(string[] containedLetters)
+        {
+            string pattern = string.Join("", containedLetters);
+            if (Match(pattern))
+            {
+                return null;
+            }
+            List<string> shortestMatches = new List<string>();
+            for (int len = pattern.Length - 1; len > 0; len--)
+            {
+                StringBuilder sb = new StringBuilder(pattern);
+                for (int i = len; i < pattern.Length; i++)
+                {
+                    sb[i] = '_';
+                    string newPattern = sb.ToString();
+
+                    if (!Match(newPattern))
+                    {
+                        if (i == len)
+                        {
+                            shortestMatches.Clear();
+                        }
+                        shortestMatches.Add(newPattern);
+                    }
+                    else
+                    {
+                        System.Console.WriteLine("Patterny: " + shortestMatches.Count);
+                        foreach (string pat in shortestMatches)
+                        {
+                            System.Console.WriteLine(pat);
+                        }
+                        return shortestMatches;
+                    }
+                }
+            }
+            return shortestMatches;  // Nenalezli jsme žádný odpovídající vzor
+        }
+        public bool Match(string containedLetters)
+        {
+            string regexPattern = containedLetters.Replace("_", ".");
+
+            // Přidání hranic slov pro přesné vyhledání slova
+            regexPattern = @"\b" + regexPattern + @"\b";
+
+            return dictionary.dictionary.AsParallel().Any(w => Regex.IsMatch(w.word, regexPattern));
+        }
+
+        public bool Match(string[] currentContainedLetters, string[] containedLetters)
+        {
+            string ccl = string.Join("", currentContainedLetters);
+            string cl = string.Join("", containedLetters);
+
+            ccl = ccl.Replace("_", ".");
+            cl = cl.Replace("_", ".");
+            return Regex.IsMatch(ccl, cl);
+        }
+
+
+
+        bool DeadEndAlreadyFound(string[,] cs, int x, int y, bool horizontalDirection) 
         {
             string[] currentContainedLetters = ContainedLetters(cs, x, y, horizontalDirection);
-            currentContainedLetters = GetMinimumImposibile(currentContainedLetters);
+            currentContainedLetters = GetMinimalImposibilePath(currentContainedLetters);
 
             foreach ((string[] containedLetters, bool horizontalDirection) t in impossiblePathsList[x][y])
             {
+                if (t.Item2 != horizontalDirection)
+                {
+                    continue;
+                }
                 string[] containedLetters = t.Item1;
                 if (containedLetters.SequenceEqual(currentContainedLetters))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        bool DeadEndAlreadyFoundInner(string[,] cs, int x, int y, bool horizontalDirection) 
+        {
+            string[] currentContainedLetters = ContainedLetters(cs, x, y, horizontalDirection);
+            currentContainedLetters = GetMinimalImposibilePath(currentContainedLetters);
+
+            foreach ((string[] containedLetters, bool horizontalDirection) t in impossiblePathsList[x][y])
+            {
+                if (t.Item2 != horizontalDirection)
+                {
+                    continue;
+                }
+                string[] containedLetters = t.Item1;
+
+                if (Match(currentContainedLetters, containedLetters))
                 {
                     return true;
                 }
@@ -878,7 +962,7 @@ namespace BAK
                                 if (word == null) return null;
                             }
                             cs[x, y] = cs[x, y].Replace("/clue", "/" + word.clue);
-                            x--;     
+                            x--;
                             PrintCs(cs);
                         }
                         else

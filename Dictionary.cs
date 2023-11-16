@@ -246,5 +246,10 @@ namespace BAK
                 s.Print();
             }
         }
+
+        internal bool Any(Func<object, bool> p)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

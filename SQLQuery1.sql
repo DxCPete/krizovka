@@ -1,0 +1,1 @@
+﻿select * from Dictionary where word like 'A___';

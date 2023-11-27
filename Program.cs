@@ -12,7 +12,10 @@ namespace BAK
 
         static void Main(string[] args)
         {
-            new CrosswordSwedish(9,9);
+            new CrosswordSwedish(8,8);
+            
+
+
             // System.Console.WriteLine(Match("ko__a"));  // false
             // System.Console.WriteLine(FindShortestPossibleMatch("o_d_a"));  // Vrátí "k____" protože odpovídá "krysa".
 

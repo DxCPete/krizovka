@@ -129,8 +129,8 @@ namespace BAK
         public Word SelectWord(List<Word> usedWords, string[] wordContains)
         {
             Word word = new Word(string.Concat(wordContains), "");
-            Word selectedWord = (Word)dictionary.Where(w => comparer.Equals(w, word))
-                .Take(1);
+            Word selectedWord = (Word)usedWords.Where(w => comparer.Equals(w, word))
+                .First();
             return selectedWord;
         }
 

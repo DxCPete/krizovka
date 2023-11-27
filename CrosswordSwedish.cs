@@ -41,6 +41,7 @@ namespace BAK
         int pocetNesplnitelnychCest = 0;
         void FillBorder(string[,] currentCs, List<Word> currentUsedWords)
         {
+            PrintCs(currentCs);
             if (isFinished) return;
             if (OneLetterWordInStart(currentCs)) return;
             if (!WordCanGoFromHere(currentCs)) return;
@@ -141,6 +142,7 @@ namespace BAK
 
         void FillInside(string[,] currentCs, List<Word> currentUsedWords, int x, int y)
         {
+            if (isFinished) return;
             if (IsFinished(currentCs))
             {
                 PrintCs(currentCs);
@@ -157,7 +159,6 @@ namespace BAK
 
                 return;
             }
-            if (isFinished) return;
             currentCs = (string[,])GetCsReady(currentCs).Clone();
             PrintCs(currentCs);
             if (!WordCanGoFromHere(currentCs)) return;
@@ -179,7 +180,6 @@ namespace BAK
                 WordWrite(csClone, word, x, y, horizontalDirection);
                 usedWordsClone.Add(word);
                 //word.Print();
-                PrintCs(csClone);
                 FillInside(csClone, usedWordsClone, x, y);
             }
 
@@ -189,7 +189,7 @@ namespace BAK
                 {
                     PrintCs(currentCs);
                     //containedLetters = GetMinimumImposibile(containedLetters);
-                    List<string> impossiblePatterns = FindShortestPossibleMatches(containedLetters);
+                    List<string> impossiblePatterns = FindShortestImpossibleMatches(containedLetters);
                     foreach (string pattern in impossiblePatterns)
                     {
                         impossiblePathsList[x][y].Add((pattern.ToCharArray().Select(c => c.ToString()).ToArray(), horizontalDirection));
@@ -290,14 +290,6 @@ namespace BAK
                     {
                         pismena[i] = "_";
                     }
-                    else if (cs[x + i, y].Contains("7") || cs[x + i, y].Contains("clue"))
-                    {
-                        break;
-                    }
-                    else // tohle je asi zbytečný
-                    {
-                        break;
-                    }
                     i += 1;
                 }
             }
@@ -314,14 +306,6 @@ namespace BAK
                     else if (cs[x, y + i] == " ")
                     {
                         pismena[i] = "_";
-                    }
-                    else if (cs[x, y + i].Contains("7") || cs[x, y + i].Contains("clue"))
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        break;
                     }
                     i += 1;
                 }
@@ -625,12 +609,12 @@ namespace BAK
             return false;
         }
 
-        public List<string> FindShortestPossibleMatches(string[] containedLetters)
+        public List<string> FindShortestImpossibleMatches(string[] containedLetters)
         {
             string pattern = string.Join("", containedLetters);
             if (Match(pattern))
             {
-                return null;
+                return new List<string>();
             }
             List<string> shortestMatches = new List<string>();
             for (int len = pattern.Length - 1; len > 0; len--)
@@ -643,15 +627,12 @@ namespace BAK
 
                     if (!Match(newPattern))
                     {
-                        if (i == len)
-                        {
-                            shortestMatches.Clear();
-                        }
                         shortestMatches.Add(newPattern);
                     }
                     else
                     {
-                        System.Console.WriteLine("Patterny: " + shortestMatches.Count);
+                        
+                        System.Console.WriteLine("Pattern = " + pattern + " a jeho počet vyskytů: " + shortestMatches.Count);
                         foreach (string pat in shortestMatches)
                         {
                             System.Console.WriteLine(pat);
@@ -684,7 +665,7 @@ namespace BAK
 
 
 
-        bool DeadEndAlreadyFound(string[,] cs, int x, int y, bool horizontalDirection) 
+        bool DeadEndAlreadyFound(string[,] cs, int x, int y, bool horizontalDirection)
         {
             string[] currentContainedLetters = ContainedLetters(cs, x, y, horizontalDirection);
             currentContainedLetters = GetMinimalImposibilePath(currentContainedLetters);
@@ -704,7 +685,7 @@ namespace BAK
             return false;
         }
 
-        bool DeadEndAlreadyFoundInner(string[,] cs, int x, int y, bool horizontalDirection) 
+        bool DeadEndAlreadyFoundInner(string[,] cs, int x, int y, bool horizontalDirection)
         {
             string[] currentContainedLetters = ContainedLetters(cs, x, y, horizontalDirection);
             currentContainedLetters = GetMinimalImposibilePath(currentContainedLetters);
@@ -727,6 +708,8 @@ namespace BAK
 
         bool WordCanGoFromHere(string[,] cs) // existuje místo pro slova o délce 1 || je trojuhelnik legend
         {
+            if (IsClue(cs[width - 1, height - 1])) return false;
+            
             for (int y = 1; y < height; y++)
             {
                 for (int x = 1; x < width; x++)
@@ -896,7 +879,7 @@ namespace BAK
                     {
                         return false;
                     }
-                    if (cs[i, j].Contains("7"))
+                    if (i > 3 && j > 3 && cs[i, j].Contains("7"))
                     {
                         return false;
                     }
@@ -956,7 +939,7 @@ namespace BAK
                         {
                             containedLetters = ContainedLetters(cs, x, y, false);
                             word = dictionary.GetRightClue(usedWords, containedLetters);
-                            if (word == null)
+                            if (word.word.Equals(""))
                             {
                                 word = dictionary.SelectWord(usedWords, containedLetters);
                                 if (word == null) return null;
@@ -969,7 +952,7 @@ namespace BAK
                         {
                             containedLetters = ContainedLetters(cs, x, y, true);
                             word = dictionary.GetRightClue(usedWords, containedLetters);
-                            if (word == null)
+                            if (word.word.Equals(""))
                             {
                                 word = dictionary.SelectWord(usedWords, containedLetters);
                                 if (word == null) return null;

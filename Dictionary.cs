@@ -30,7 +30,7 @@ namespace BAK
             if (con.State == System.Data.ConnectionState.Open)
             {
                 int language = languageCzech ? 1 : 0;
-                string query = "SELECT * FROM dbo.Dictionary WHERE czechLanguage = " + language + " AND difficulty = " + difficulty + ";";
+                string query = "SELECT * FROM dbo.Dictionary;";// WHERE czechLanguage = " + language + " AND difficulty = " + difficulty + ";";
 
                 SqlCommand command = new SqlCommand(query, con);
                 SqlDataReader reader = command.ExecuteReader();
@@ -126,12 +126,21 @@ namespace BAK
 
 
 
-        public Word SelectWord(List<Word> usedWords, string[] wordContains)
+        public Word SelectWord(List<Word> usedWords, string[] wordContains, string[,] crossword /*jenom pro test*/)
         {
-            Word word = new Word(string.Concat(wordContains), "");
-            Word selectedWord = (Word)usedWords.Where(w => comparer.Equals(w, word))
-                .First();
-            return selectedWord;
+            try
+            {
+                Word word = new Word(string.Concat(wordContains), "");
+                Word selectedWord = (Word)usedWords.Where(w => comparer.Equals(w, word))
+                    .First();
+                return selectedWord;
+            }catch(Exception ex)
+            {
+
+                Console.WriteLine("Posralo se to pro: " +  string.Concat(wordContains));
+                Console.WriteLine(ex);
+                throw ex;
+            }
         }
 
         public bool ImpossibleToSelect(string containedLetters)

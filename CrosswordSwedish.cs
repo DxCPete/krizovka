@@ -12,7 +12,6 @@ namespace BAK
     class CrosswordSwedish : Crossword
     {
         bool isFinished = false;
-        Semaphore sema = new Semaphore(1, 1);
 
         public CrosswordSwedish(int x, int y) : base(x, y)
         {
@@ -38,7 +37,7 @@ namespace BAK
 
 
         int test = 0;
-        int pocetNesplnitelnychCest = 0;
+        int pocetNesplnitelnychCest = 0; //test only
         void FillBorder(string[,] currentCs, List<Word> currentUsedWords)
         {
             PrintCs(currentCs);
@@ -631,7 +630,6 @@ namespace BAK
                     }
                     else
                     {
-                        
                         System.Console.WriteLine("Pattern = " + pattern + " a jeho počet vyskytů: " + shortestMatches.Count);
                         foreach (string pat in shortestMatches)
                         {
@@ -709,7 +707,7 @@ namespace BAK
         bool WordCanGoFromHere(string[,] cs) // existuje místo pro slova o délce 1 || je trojuhelnik legend
         {
             if (IsClue(cs[width - 1, height - 1])) return false;
-            
+
             for (int y = 1; y < height; y++)
             {
                 for (int x = 1; x < width; x++)
@@ -941,7 +939,7 @@ namespace BAK
                             word = dictionary.GetRightClue(usedWords, containedLetters);
                             if (word.word.Equals(""))
                             {
-                                word = dictionary.SelectWord(usedWords, containedLetters);
+                                word = dictionary.SelectWord(usedWords, containedLetters, cs);
                                 if (word == null) return null;
                             }
                             cs[x, y] = cs[x, y].Replace("/clue", "/" + word.clue);
@@ -954,7 +952,7 @@ namespace BAK
                             word = dictionary.GetRightClue(usedWords, containedLetters);
                             if (word.word.Equals(""))
                             {
-                                word = dictionary.SelectWord(usedWords, containedLetters);
+                                word = dictionary.SelectWord(usedWords, containedLetters, cs);
                                 if (word == null) return null;
                             }
                             cs[x, y] = cs[x, y].Replace("clue", word.clue);
@@ -990,8 +988,6 @@ namespace BAK
         {
 
             string dir = System.Environment.CurrentDirectory;
-
-            sema.WaitOne();
             using (StreamWriter outputFile = new StreamWriter(Path.Combine(dir, "output.txt")))
             {
 
@@ -1004,7 +1000,6 @@ namespace BAK
                     outputFile.WriteLine();
                 }
             }
-            sema.Release();
         }
 
     }

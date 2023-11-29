@@ -12,7 +12,7 @@ namespace BAK
 
         static void Main(string[] args)
         {
-            new CrosswordSwedish(8,8);
+            new CrosswordSwedish(8,8); //někde se to přepisuje / nezapisuje 7 za napsané slovo
             
 
 

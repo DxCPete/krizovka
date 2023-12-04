@@ -126,7 +126,7 @@ namespace BAK
 
 
 
-        public Word SelectWord(List<Word> usedWords, string[] wordContains, string[,] crossword /*jenom pro test*/)
+        public Word SelectWord(List<Word> usedWords, string[] wordContains, /*jenom pro test*/string[,] crossword, int x, int y, bool horizontalDirection)
         {
             try
             {

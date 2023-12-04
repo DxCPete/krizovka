@@ -12,8 +12,12 @@ namespace BAK
 
         static void Main(string[] args)
         {
-            new CrosswordSwedish(8,8); //někde se to přepisuje / nezapisuje 7 za napsané slovo
-            
+            new CrosswordSwedish(7,7); 
+            //někde se to přepisuje / nezapisuje 7 za napsané slovo
+            /*
+             teď asi finishCsClues inner asi špatně dává směry
+             */
+
 
 
             // System.Console.WriteLine(Match("ko__a"));  // false
@@ -32,7 +36,7 @@ namespace BAK
                 return pattern;
             }
             List<string> patterns = new List<string>();
-            for (int len = pattern.Length - 1; len > 0; len--)
+            for (int len = pattern.Length - 1; len > 0; len--)  
             {
                 StringBuilder sb = new StringBuilder(pattern);
                 for (int i = len; i < pattern.Length; i++)

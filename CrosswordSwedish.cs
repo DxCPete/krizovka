@@ -12,6 +12,7 @@ namespace BAK
     class CrosswordSwedish : Crossword
     {
         bool isFinished = false;
+        string fillerChar = "#";
 
         public CrosswordSwedish(int x, int y) : base(x, y)
         {
@@ -20,7 +21,7 @@ namespace BAK
         public override void Generate()
         {
             //Tajenka();
-            crossword[0, 0] = "X";
+            crossword[0, 0] = fillerChar;
             FillBorder(crossword, new List<Word>());
 
             zapisVysledek(crossword);
@@ -279,7 +280,7 @@ namespace BAK
             {
                 x++;
                 pismena = new string[width - x];
-                while (x + i < width)
+                while (x + i < width && !IsClue(cs[x + i, y]))
                 {
                     if (regex.IsMatch(cs[x + i, y]) && cs[x + i, y].Length <= 1)
                     {
@@ -296,7 +297,7 @@ namespace BAK
             {
                 y++;
                 pismena = new string[height - y];
-                while (y + i < height)
+                while (y + i < height && !IsClue(cs[x, y + i]))
                 {
                     if (regex.IsMatch(cs[x, y + i]) && cs[x, y + i].Length <= 1)
                     {
@@ -877,7 +878,7 @@ namespace BAK
                     {
                         return false;
                     }
-                    if (i > 3 && j > 3 && cs[i, j].Contains("7"))
+                    if (i > 0 && j > 0 && cs[i, j].Contains("7"))
                     {
                         return false;
                     }
@@ -939,7 +940,7 @@ namespace BAK
                             word = dictionary.GetRightClue(usedWords, containedLetters);
                             if (word.word.Equals(""))
                             {
-                                word = dictionary.SelectWord(usedWords, containedLetters, cs);
+                                word = dictionary.SelectWord(usedWords, containedLetters, cs, x, y, false);
                                 if (word == null) return null;
                             }
                             cs[x, y] = cs[x, y].Replace("/clue", "/" + word.clue);
@@ -952,7 +953,7 @@ namespace BAK
                             word = dictionary.GetRightClue(usedWords, containedLetters);
                             if (word.word.Equals(""))
                             {
-                                word = dictionary.SelectWord(usedWords, containedLetters, cs);
+                                word = dictionary.SelectWord(usedWords, containedLetters, cs, x, y, true);
                                 if (word == null) return null;
                             }
                             cs[x, y] = cs[x, y].Replace("clue", word.clue);
@@ -966,7 +967,7 @@ namespace BAK
 
         public bool IsClue(string potentionalClue)
         {
-            return potentionalClue.Contains("clue") || potentionalClue.Contains("7") /*|| potentionalClue.Length > 1*/;
+            return potentionalClue.Length > 1 || potentionalClue.Contains("clue") || potentionalClue.Contains("7") || potentionalClue.Contains("/");
         }
 
         bool IsEverythingAlright(string[,] cs)
@@ -975,8 +976,9 @@ namespace BAK
             {
                 for (int x = 0; x < width; x++)
                 {
-                    if (cs[x, y] == " " || IsClue(cs[x, y]))
+                    if (cs[x, y] == " " || cs[x, y].Contains("7") || cs[x, y].Contains("clue"))
                     {
+                        Console.WriteLine(x + " " + y);
                         return false;
                     }
                 }

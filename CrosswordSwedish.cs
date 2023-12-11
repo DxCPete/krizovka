@@ -218,7 +218,7 @@ namespace BAK
             }
             else
             {
-                for (int i = min; i < width; i++)
+                for (int i = min; i < height; i++)
                 {
                     if (cs[0, i] == " " && !IsClue(cs[1, i])) return (0, i, true);
                 }
@@ -627,11 +627,12 @@ namespace BAK
 
                     if (!Match(newPattern))
                     {
+                        Console.WriteLine("Patter: " + newPattern);
                         shortestMatches.Add(newPattern);
                     }
                     else
                     {
-                        System.Console.WriteLine("Pattern = " + pattern + " a jeho počet vyskytů: " + shortestMatches.Count);
+                        System.Console.WriteLine("Počet podpaternů: " + shortestMatches.Count);
                         foreach (string pat in shortestMatches)
                         {
                             System.Console.WriteLine(pat);
@@ -932,7 +933,7 @@ namespace BAK
             {
                 for (int x = 1; x < width; x++)
                 {
-                    if (IsClue(cs[x, y]))
+                    if (cs[x, y].Contains("clue") || cs[x, y].Contains("7"))
                     {
                         if (cs[x, y].Contains("/clue"))
                         {
@@ -976,7 +977,7 @@ namespace BAK
             {
                 for (int x = 0; x < width; x++)
                 {
-                    if (cs[x, y] == " " || cs[x, y].Contains("7") || cs[x, y].Contains("clue"))
+                    if ((x * y != 0 && cs[x, y] == " ") || cs[x, y].Contains("7") || cs[x, y].Contains("clue"))
                     {
                         Console.WriteLine(x + " " + y);
                         return false;

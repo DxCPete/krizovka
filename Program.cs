@@ -12,7 +12,7 @@ namespace BAK
 
         static void Main(string[] args)
         {
-            new CrosswordSwedish(7,7); 
+            new CrosswordSwedish(19,19); 
             //někde se to přepisuje / nezapisuje 7 za napsané slovo
             /*
              teď asi finishCsClues inner asi špatně dává směry

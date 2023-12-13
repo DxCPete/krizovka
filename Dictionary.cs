@@ -16,6 +16,7 @@ namespace BAK
         static string currentDirectory = System.Environment.CurrentDirectory;
         private string conStr = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=\"" + currentDirectory.Substring(0, currentDirectory.LastIndexOf("bin")) + "Directory.mdf\";Integrated Security=True"; //bude potřeba změnit, když přesunu soubor
         int limit = 100;
+        Dictionary<char, int> indexes;
 
         public Dictionary(int maxLength)
         {
@@ -56,21 +57,35 @@ namespace BAK
             Random rnd = new Random();
             dictionary = dictionary.GroupBy(w => w.word)
                 .Select(s => s.First())
-                .OrderBy(r => rnd.Next())
+                .OrderBy(w => w.word)
                 .ToList();
+
+
+            indexes = dictionary.Select((word, index) => new { Word = word, Index = index })
+                .GroupBy(item => item.Word.word[0])
+                .ToDictionary(group => group.Key, group => group.First().Index);
+
+
+
+
         }
 
-        public List<Word> SelectWordsTest()
+
+
+        public List<Word> SelectWords(List<Word> usedWords, string[] containedLetters) //ten hlavní
         {
-            return dictionary.AsParallel().ToList();
-        }
-
-
-
-        public List<Word> SelectWords(List<Word> usedWords, string[] wordContains)
-        {
-            Word w = new Word(string.Concat(wordContains), "");
+            Word w = new Word(string.Concat(containedLetters), "");
+            int startIndex = 0;
+            if (Char.IsLetter(char.Parse(containedLetters[0])))
+            {
+                startIndex = indexes[char.Parse(containedLetters[0])];
+            }
+            else
+            {
+                startIndex = new Random().Next(startIndex, dictionary.Count - 1000);
+            }
             List<Word> wordsFiltered = dictionary.AsParallel()
+                .Skip(startIndex)
                 .Except(usedWords.AsParallel())
                 .Where(word => comparer.Equals(word, w))
                 .Take(limit)
@@ -94,7 +109,7 @@ namespace BAK
             Word word = new Word(string.Concat(wordContains), "");
             // Word rightWord = (Word)usedWords.Where(w => w.word.Equals(word.word));
             List<Word> list = usedWords.Where(w => w.word.Equals(word.word)).ToList();
-            if(list.Count <= 0)
+            if (list.Count <= 0)
             {
                 return new Word("", "");
             }
@@ -134,10 +149,11 @@ namespace BAK
                 Word selectedWord = (Word)usedWords.Where(w => comparer.Equals(w, word))
                     .First();
                 return selectedWord;
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
 
-                Console.WriteLine("Posralo se to pro: " +  string.Concat(wordContains));
+                Console.WriteLine("Posralo se to pro: " + string.Concat(wordContains));
                 Console.WriteLine(ex);
                 throw ex;
             }

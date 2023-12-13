@@ -1,5 +1,6 @@
 ﻿
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,12 +13,7 @@ namespace BAK
 
         static void Main(string[] args)
         {
-            new CrosswordSwedish(19,19); 
-            //někde se to přepisuje / nezapisuje 7 za napsané slovo
-            /*
-             teď asi finishCsClues inner asi špatně dává směry
-             */
-
+            new CrosswordSwedish(12,12); 
 
 
             // System.Console.WriteLine(Match("ko__a"));  // false
@@ -36,7 +32,7 @@ namespace BAK
                 return pattern;
             }
             List<string> patterns = new List<string>();
-            for (int len = pattern.Length - 1; len > 0; len--)  
+            for (int len = pattern.Length - 1; len > 0; len--)
             {
                 StringBuilder sb = new StringBuilder(pattern);
                 for (int i = len; i < pattern.Length; i++)
@@ -57,7 +53,7 @@ namespace BAK
                     else
                     {
                         System.Console.WriteLine("Patterny: " + patterns.Count);
-                        foreach(string pat in patterns)
+                        foreach (string pat in patterns)
                         {
                             System.Console.WriteLine(pat);
                         }
@@ -70,7 +66,7 @@ namespace BAK
         }
         static public bool Match(string pattern)
         {
-            string[] dictionary = { "krysa", "kniha", "auto", "traktor", "pes", "omega"};
+            string[] dictionary = { "krysa", "kniha", "auto", "traktor", "pes", "omega" };
 
             // Nahrazení '_' znaku ve vzoru za jakékoliv písmeno
             string regexPattern = pattern.Replace("_", ".");

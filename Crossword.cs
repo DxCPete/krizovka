@@ -25,7 +25,6 @@ namespace BAK
         {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            //Tajenka();
            
             this.width = width;
             this.height = height;
@@ -52,6 +51,7 @@ namespace BAK
             Generate();
             Print();
             stopwatch.Stop();
+            
             Console.WriteLine("Program běžel " + stopwatch.Elapsed);
         }
 

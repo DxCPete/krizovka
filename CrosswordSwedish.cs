@@ -12,7 +12,7 @@ namespace BAK
     class CrosswordSwedish : Crossword
     {
         bool isFinished = false;
-        string fillerChar = "#";
+        string randomChar = "#"; //místo toho bude nakonec nápověda
 
         public CrosswordSwedish(int x, int y) : base(x, y)
         {
@@ -21,7 +21,7 @@ namespace BAK
         public override void Generate()
         {
             //Tajenka();
-            crossword[0, 0] = fillerChar;
+            crossword[0, 0] = randomChar;
             FillBorder(crossword, new List<Word>());
 
             zapisVysledek(crossword);
@@ -32,7 +32,7 @@ namespace BAK
         {
             if (width > 10)
             {
-                //WordWrite(crossword, new Word("TAJENKABE", ""), 0, 3, true);
+                //WordWrite(crossword, new Word("TAJENKA", ""), 0, 3, true);
             }
         }
 
@@ -142,6 +142,7 @@ namespace BAK
 
         void FillInside(string[,] currentCs, List<Word> currentUsedWords, int x, int y)
         {
+            PrintCs(currentCs);
             if (isFinished) return;
             if (IsFinished(currentCs))
             {
@@ -274,17 +275,19 @@ namespace BAK
         public string[] ContainedLetters(string[,] cs, int x, int y, bool horintalDirection)
         {
             string[] pismena;
+            //StringBuilder pismena = new StringBuilder();
             int i = 0;
             Regex regex = new Regex(@"[\p{Lu}\p{L}ÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]");
             if (horintalDirection)
             {
                 x++;
-                pismena = new string[width - x];
+               pismena = new string[width - x];
                 while (x + i < width && !IsClue(cs[x + i, y]))
                 {
                     if (regex.IsMatch(cs[x + i, y]) && cs[x + i, y].Length <= 1)
                     {
-                        pismena[i] = cs[x + i, y];
+                       //pismena.Append(cs[x + i, y]);
+                        pismena[i] =  cs[x + i, y];
                     }
                     else if (cs[x + i, y] == " ")
                     {
@@ -301,7 +304,7 @@ namespace BAK
                 {
                     if (regex.IsMatch(cs[x, y + i]) && cs[x, y + i].Length <= 1)
                     {
-                        pismena[i] = cs[x, y + i];
+                       pismena[i] =cs[x, y + i];
                     }
                     else if (cs[x, y + i] == " ")
                     {
@@ -1003,6 +1006,7 @@ namespace BAK
                     outputFile.WriteLine();
                 }
             }
+            
         }
 
     }

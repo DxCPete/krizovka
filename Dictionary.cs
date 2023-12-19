@@ -15,7 +15,7 @@ namespace BAK
         private WordComparer comparer { get; } = new WordComparer();
         static string currentDirectory = System.Environment.CurrentDirectory;
         private string conStr = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=\"" + currentDirectory.Substring(0, currentDirectory.LastIndexOf("bin")) + "Directory.mdf\";Integrated Security=True"; //bude potřeba změnit, když přesunu soubor
-        int limit = 100;
+        int limit = 50;
         Dictionary<char, int> indexes;
 
         public Dictionary(int maxLength)

@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace BAK
 {
@@ -20,11 +20,12 @@ namespace BAK
 
         public override void Generate()
         {
-            //Tajenka();
+            Tajenka();
             crossword[0, 0] = randomChar;
             FillBorder(crossword, new List<Word>());
 
-            zapisVysledek(crossword);
+
+            //zapisVysledek(crossword);
             Print();
         }
 
@@ -32,12 +33,12 @@ namespace BAK
         {
             if (width > 10)
             {
-                //WordWrite(crossword, new Word("TAJENKA", ""), 0, 3, true);
+                WordWrite(crossword, new Word("TAJENKA", ""), 0, 3, true);
             }
         }
 
 
-        int test = 0;
+        int deadEnded = 0;
         int pocetNesplnitelnychCest = 0; //test only
         void FillBorder(string[,] currentCs, List<Word> currentUsedWords)
         {
@@ -59,8 +60,7 @@ namespace BAK
             bool horizontalDirection = t.Item3;
             if (DeadEnd(currentCs, x, y) || DeadEndInner(currentCs, x, y))
             {
-                test++;
-                Console.WriteLine(test);
+                deadEnded++;
                 PrintCs(currentCs);
                 return;
             }
@@ -164,7 +164,11 @@ namespace BAK
             PrintCs(currentCs);
             if (!WordCanGoFromHere(currentCs)) return;
 
-            if (DeadEndInner(currentCs, x, y)) return;
+            if (DeadEndInner(currentCs, x, y))
+            {
+                deadEnded++;
+                return;
+            }
             (int, int, bool) t = StartingCellInside(currentCs, x, y);
             x = t.Item1;
             y = t.Item2;
@@ -281,13 +285,13 @@ namespace BAK
             if (horintalDirection)
             {
                 x++;
-               pismena = new string[width - x];
+                pismena = new string[GetMaxWordLength(cs, x, y, horintalDirection)];
                 while (x + i < width && !IsClue(cs[x + i, y]))
                 {
                     if (regex.IsMatch(cs[x + i, y]) && cs[x + i, y].Length <= 1)
                     {
-                       //pismena.Append(cs[x + i, y]);
-                        pismena[i] =  cs[x + i, y];
+                        //pismena.Append(cs[x + i, y]);
+                        pismena[i] = cs[x + i, y];
                     }
                     else if (cs[x + i, y] == " ")
                     {
@@ -299,12 +303,12 @@ namespace BAK
             else
             {
                 y++;
-                pismena = new string[height - y];
+                pismena = new string[GetMaxWordLength(cs, x, y, horintalDirection)];
                 while (y + i < height && !IsClue(cs[x, y + i]))
                 {
                     if (regex.IsMatch(cs[x, y + i]) && cs[x, y + i].Length <= 1)
                     {
-                       pismena[i] =cs[x, y + i];
+                        pismena[i] = cs[x, y + i];
                     }
                     else if (cs[x, y + i] == " ")
                     {
@@ -316,6 +320,27 @@ namespace BAK
             return pismena;
         }
 
+        public int GetMaxWordLength(string[,] cs, int x, int y, bool horizontalDirection)
+        {
+            int i = 0;
+            if (horizontalDirection)
+            {
+                while (x + i < width && !IsClue(cs[x + i, y]))
+                {
+                    i++;
+                }
+
+            }
+            else
+            {
+                while (y + i < height && !IsClue(cs[x, y + i]))
+                {
+                    i++;
+                }
+            }
+            Console.WriteLine(i);
+            return i;
+        }
 
         public string[,] WordWrite(string[,] cs, Word word, int x, int y, bool horizontalDirection)
         {
@@ -545,7 +570,9 @@ namespace BAK
             string[] currentContainedLetters;
             for (int j = Math.Max(1, y); j < height; j++)
             {
+                if (impossiblePathsList[0][j].Count == 0) continue;
                 currentContainedLetters = ContainedLetters(cs, 0, j, true);
+                if (currentContainedLetters.Length == 0) continue;
                 if (currentContainedLetters[0] == "_") break;
                 currentContainedLetters = GetMinimalImposibilePath(currentContainedLetters);
                 for (int i = impossiblePathsList[0][j].Count - 1; i >= 0; i--)
@@ -560,7 +587,9 @@ namespace BAK
             }
             for (int i = Math.Max(1, x); i < width; i++)
             {
+                if (impossiblePathsList[i][0].Count == 0) continue;
                 currentContainedLetters = ContainedLetters(cs, i, 0, false);
+                if (currentContainedLetters.Length == 0) continue;
                 if (currentContainedLetters[0] == "_") break;
                 currentContainedLetters = GetMinimalImposibilePath(currentContainedLetters);
                 for (int j = impossiblePathsList[i][0].Count - 1; j >= 0; j--)
@@ -586,6 +615,7 @@ namespace BAK
             {
                 for (int i = 1; i < width; i++)
                 {
+                    if (impossiblePathsList[i][j].Count == 0) continue;
                     if (x > i && y > j) continue;
                     currentContainedLettersHor = ContainedLetters(cs, i, j, true);
 
@@ -1006,7 +1036,7 @@ namespace BAK
                     outputFile.WriteLine();
                 }
             }
-            
+
         }
 
     }

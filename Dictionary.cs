@@ -20,10 +20,17 @@ namespace BAK
 
         public Dictionary(int maxLength)
         {
-            setDictionary(maxLength); //přidat k tomu podmínku, že musí být menší jak min(x,y)-1 z rozměrů křížovky
+            SetDictionary(maxLength); 
         }
 
-        public void setDictionary(int maxLength)
+        public string vymazCarky(string word)
+        {
+            return word.Replace("Á", "A").Replace("É", "E").Replace("Í", "I")
+                .Replace("Ó", "O").Replace("Ú", "U").Replace("Ů", "U").Replace("Ý", "Y");
+        }
+
+
+        public void SetDictionary(int maxLength)
         {
             SqlConnection con = new SqlConnection(conStr);
 
@@ -41,6 +48,7 @@ namespace BAK
                     string w = reader["word"].ToString();
                     string c = reader["clue"].ToString();
                     if (w.Length >= maxLength || w.Contains(" ") || w.Contains("-") || w.Contains("/") || w.Contains("-")) continue;
+                    w = vymazCarky(w);
                     dictionary.Add(new Word(w, c));
                     n++;
                 }
@@ -64,10 +72,6 @@ namespace BAK
             indexes = dictionary.Select((word, index) => new { Word = word, Index = index })
                 .GroupBy(item => item.Word.word[0])
                 .ToDictionary(group => group.Key, group => group.First().Index);
-
-
-
-
         }
 
 
@@ -76,14 +80,25 @@ namespace BAK
         {
             Word w = new Word(string.Concat(containedLetters), "");
             int startIndex = 0;
-            if (Char.IsLetter(char.Parse(containedLetters[0])))
+            try
             {
-                startIndex = indexes[char.Parse(containedLetters[0])];
+                if (Char.IsLetter(char.Parse(containedLetters[0])))
+                {
+                    startIndex = indexes[char.Parse(containedLetters[0])];
+                }
+                else
+                {
+                    startIndex = new Random().Next(startIndex, dictionary.Count - 1000);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                startIndex = new Random().Next(startIndex, dictionary.Count - 1000);
+                Console.WriteLine(containedLetters[0]);
+                Console.WriteLine(ex);
+                throw new Exception("uz zas");
             }
+
+           
             List<Word> wordsFiltered = dictionary.AsParallel()
                 .Skip(startIndex)
                 .Except(usedWords.AsParallel())
@@ -245,6 +260,12 @@ namespace BAK
                     dictionary.Add(new Word(word, clue));
                 }
             }
+        }
+
+       public Word TestGetWord(string clue)
+        {
+            return (Word)dictionary.Where(w => w.clue.Equals(clue))
+                .First();
         }
 
 

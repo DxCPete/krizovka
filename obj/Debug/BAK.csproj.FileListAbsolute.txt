@@ -30,3 +30,12 @@ C:\Users\petro\OneDrive\Desktop\BAK - C#\obj\Debug\BAK.csproj.AssemblyReference.
 C:\Users\petro\OneDrive\Desktop\BAK - C#\obj\Debug\BAK.csproj.CoreCompileInputs.cache
 C:\Users\petro\OneDrive\Desktop\BAK - C#\obj\Debug\BAK.exe
 C:\Users\petro\OneDrive\Desktop\BAK - C#\obj\Debug\BAK.pdb
+C:\Users\Pete\OneDrive\Desktop\todo\K-ovka\bin\Debug\Directory.mdf
+C:\Users\Pete\OneDrive\Desktop\todo\K-ovka\bin\Debug\Directory_log.ldf
+C:\Users\Pete\OneDrive\Desktop\todo\K-ovka\bin\Debug\BAK.exe.config
+C:\Users\Pete\OneDrive\Desktop\todo\K-ovka\bin\Debug\BAK.exe
+C:\Users\Pete\OneDrive\Desktop\todo\K-ovka\bin\Debug\BAK.pdb
+C:\Users\Pete\OneDrive\Desktop\todo\K-ovka\obj\Debug\BAK.csproj.AssemblyReference.cache
+C:\Users\Pete\OneDrive\Desktop\todo\K-ovka\obj\Debug\BAK.csproj.CoreCompileInputs.cache
+C:\Users\Pete\OneDrive\Desktop\todo\K-ovka\obj\Debug\BAK.exe
+C:\Users\Pete\OneDrive\Desktop\todo\K-ovka\obj\Debug\BAK.pdb

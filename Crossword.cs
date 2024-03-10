@@ -25,10 +25,10 @@ namespace BAK
         {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-           
+
             this.width = width;
             this.height = height;
-            dictionary = new Dictionary(Math.Min(width, height));
+            dictionary = new Dictionary(Math.Max(width, height) - 1);
 
             impossiblePathsList = new List<(string[] containedLetters, bool horizontalDirection)>[width][];
             for (int i = 0; i < width; i++)
@@ -51,7 +51,7 @@ namespace BAK
             Generate();
             Print();
             stopwatch.Stop();
-            
+
             Console.WriteLine("Program běžel " + stopwatch.Elapsed);
         }
 

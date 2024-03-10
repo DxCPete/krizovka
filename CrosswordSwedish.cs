@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace BAK
 {
@@ -13,6 +11,8 @@ namespace BAK
     {
         bool isFinished = false;
         string randomChar = "#"; //místo toho bude nakonec nápověda
+        string clueSymbol = "7";
+
 
         public CrosswordSwedish(int x, int y) : base(x, y)
         {
@@ -21,9 +21,10 @@ namespace BAK
         public override void Generate()
         {
             Tajenka();
+            // PrepareCrossword();
+            Print();
             crossword[0, 0] = randomChar;
             FillBorder(crossword, new List<Word>());
-
 
             //zapisVysledek(crossword);
             Print();
@@ -44,7 +45,7 @@ namespace BAK
         {
             PrintCs(currentCs);
             if (isFinished) return;
-            if (OneLetterWordInStart(currentCs)) return;
+            //if (OneLetterWordInStart(currentCs)) return;
             if (!WordCanGoFromHere(currentCs)) return;
             if (BorderIsFull(currentCs))
             {
@@ -58,7 +59,7 @@ namespace BAK
             int x = t.Item1;
             int y = t.Item2;
             bool horizontalDirection = t.Item3;
-            if (DeadEnd(currentCs, x, y) || DeadEndInner(currentCs, x, y))
+            if (DeadEndBorder(currentCs, x, y) || DeadEndInner(currentCs, x, y))
             {
                 deadEnded++;
                 PrintCs(currentCs);
@@ -68,24 +69,24 @@ namespace BAK
             string[] containedLetters = ContainedLetters(currentCs, x, y, horizontalDirection);
             if (containedLetters.Length < 2)
             {
-                if (currentCs[x - 1, y] == "7" && currentCs[x, y - 1] == "7")
+                if (currentCs[x - 1, y] == clueSymbol && currentCs[x, y - 1] == clueSymbol)
                 {
-                    currentCs[x, y] = "7";
+                    currentCs[x, y] = clueSymbol;
                     FillBorder(currentCs, currentUsedWords);
                 }
                 return;
             }
 
             List<Word> possibleWords;
-            if (x == 1 || y == 1)
+           /* if (x == 1 || y == 1)
             {
                 possibleWords = dictionary.SelectWords(currentUsedWords, containedLetters);
             }
             else if (y == height - 1 || x == width - 1)
             {
-                possibleWords = dictionary.SelectWords(currentUsedWords, containedLetters);//, MaxLength(currentCs, x, y, horizontalDirection) /*- 1*/);
+                possibleWords = dictionary.SelectWords(currentUsedWords, containedLetters);//, MaxLength(currentCs, x, y, horizontalDirection) - 1);
             }
-            else if (y == 2 || x == 2)
+            else */if (y == 2 || x == 2)
             {
                 int length;
                 int length1stWord;
@@ -110,14 +111,14 @@ namespace BAK
             {
                 string[,] csClone = (string[,])currentCs.Clone();
                 List<Word> usedWordsClone = currentUsedWords.ToList();
-                if (!CanPlaceBorder(csClone, word, x, y, horizontalDirection)) continue;
+                if (!CanPlace(csClone, word, x, y, horizontalDirection)) continue;
 
                 csClone = WordWrite(csClone, word, x, y, horizontalDirection);
                 usedWordsClone.Add(word);
 
                 if (x == width - 2 || y == height - 2)
                 {
-                    Prevent1LetterWordsNearEnd(csClone, horizontalDirection);
+                    PreventOneLetterWordsNearEnd(csClone, horizontalDirection);
                 }
                 if (x == 1 || x == 2 || y == 1 || y == 2)
                 {
@@ -157,7 +158,7 @@ namespace BAK
                 isFinished = true;
                 Console.WriteLine(currentCs[0, 4].Length);
                 crossword = (string[,])currentCs.Clone();
-
+                zapisVysledek(currentCs);
                 return;
             }
             currentCs = (string[,])GetCsReady(currentCs).Clone();
@@ -205,7 +206,8 @@ namespace BAK
             }
         }
 
-        public (int x, int y, bool horizontalDirection) StartingCellBorder(string[,] cs) //není trochu divná?
+
+        public (int x, int y, bool horizontalDirection) StartingCellBorder(string[,] cs)
         {
             int min = Math.Min(width, height);
             for (int i = 1; i < min; i++)
@@ -243,11 +245,11 @@ namespace BAK
             {
                 for (int i = (j == y ? x : 1); i < width; i++)
                 {
-                    if (cs[i, j].Contains("7"))
+                    if (cs[i, j].Contains(clueSymbol))
                     {
-                        if (cs[i, j] == "7/7") return (i, j, true);
-                        if (cs[i, j].Contains("/7")) return (i, j, false);
-                        if (cs[i, j].Contains("7")) return (i, j, true);
+                        if (cs[i, j] == clueSymbol + "/" + clueSymbol) return (i, j, true);
+                        if (cs[i, j].Contains("/" + clueSymbol)) return (i, j, false);
+                        if (cs[i, j].Contains(clueSymbol)) return (i, j, true);
                     }
                 }
             }
@@ -261,14 +263,14 @@ namespace BAK
 
             if (horintalDirection)
             {
-                while (x + i < width && !cs[x + i, y].Contains("7") && !cs[x + i, y].Contains("clue"))
+                while (x + i < width && !cs[x + i, y].Contains(clueSymbol) && !cs[x + i, y].Contains("clue"))
                 {
                     i += 1;
                 }
             }
             else
             {
-                while (y + i < height && !cs[x, y + i].Contains("7") && !cs[x, y + i].Contains("clue"))
+                while (y + i < height && !cs[x, y + i].Contains(clueSymbol) && !cs[x, y + i].Contains("clue"))
                 {
                     i += 1;
                 }
@@ -363,7 +365,7 @@ namespace BAK
                 }
                 if (x + i < width && cs[x + i, y] == " ")
                 {
-                    cs[x + i, y] = "7";
+                    cs[x + i, y] = clueSymbol;
                 }
             }
             else
@@ -375,7 +377,7 @@ namespace BAK
                 }
                 if (y + i < height && cs[x, y + i] == " ")
                 {
-                    cs[x, y + i] = "7";
+                    cs[x, y + i] = clueSymbol;
                 }
             }
             return cs;
@@ -388,15 +390,15 @@ namespace BAK
             {
                 if (x == 0 || y == 0)
                 {
-                    cs[x, y] = "7";
+                    cs[x, y] = clueSymbol;
                 }
-                else if (x == 1 && cs[0, y] != "7")
+                else if (x == 1 && cs[0, y] != clueSymbol)
                 {
-                    cs[x, y] = "7";
+                    cs[x, y] = clueSymbol;
                 }
-                else if (y == 1 && cs[x, 0] != "7")
+                else if (y == 1 && cs[x, 0] != clueSymbol)
                 {
-                    cs[x, y] = "7";
+                    cs[x, y] = clueSymbol;
                 }
                 else if (x != 0 && y != 0)
                 {
@@ -407,7 +409,7 @@ namespace BAK
                     PrintCs(cs);
                 }
             }
-            else if (cs[x, y] == "7" && x != 0 && y != 0)
+            else if (cs[x, y] == clueSymbol && x != 0 && y != 0)
             {
                 cs[x, y] = "clue";
             }
@@ -421,26 +423,26 @@ namespace BAK
             {
                 if (x == 0 || y == 0 || x == width - 1 || y == height - 1)
                 {
-                    cs[x, y] = "7"; 
+                    cs[x, y] = clueSymbol; 
                 }
-                else if (x < width - 1 && !cs[x + 1, y].Contains("7") && y < height - 1 && !cs[x, y + 1].Contains("7"))
+                else if (x < width - 1 && !cs[x + 1, y].Contains(clueSymbol) && y < height - 1 && !cs[x, y + 1].Contains(clueSymbol))
                 {
-                    cs[x, y] = "7";
+                    cs[x, y] = clueSymbol;
                 }
-                else cs[x, y] = "7";
+                else cs[x, y] = clueSymbol;
             }
-            else if (cs[x, y].Equals("7/7")) //může to vůbec nastat?
+            else if (cs[x, y].Equals(clueSymbol + "/" + clueSymbol)) //může to vůbec nastat?
             {
                 if (horizontalDirection)
                 {
-                    cs[x, y] = "clue/7";
+                    cs[x, y] = "clue/" + clueSymbol;
                 }
                 else
                 {
-                    cs[x, y] = "7/clue";
+                    cs[x, y] = clueSymbol + "/clue";
                 }
             }
-            else if (cs[x, y].Equals("7"))
+            else if (cs[x, y].Equals(clueSymbol))
             {
                 cs[x, y] = "clue";
             }
@@ -456,28 +458,26 @@ namespace BAK
                 cs[x, y] = "clue";
 
             }
-            else if (cs[x, y].Equals("7/7"))
+            else if (cs[x, y].Equals(clueSymbol + "/" + clueSymbol))
             {
                 if (horizontalDirection)
                 {
-                    cs[x, y] = "clue/7";
+                    cs[x, y] = "clue/" + clueSymbol;
                 }
                 else
                 {
-                    cs[x, y] = "7/clue";
+                    cs[x, y] = clueSymbol + "/clue";
                 }
             }
-            else if (cs[x, y].Contains("7"))
+            else if (cs[x, y].Contains(clueSymbol))
             {
-                cs[x, y] = cs[x, y].Replace("7", "clue");
+                cs[x, y] = cs[x, y].Replace(clueSymbol, "clue");
             }
             else
             {
             }
 
         }
-
-
 
         string[,] GetCsReady(string[,] cs)
         {
@@ -493,49 +493,34 @@ namespace BAK
                         {
                             if (!IsClue(cs[x + 1, y]))
                             {
-                                cs[x, y] = "7/clue";
+                                cs[x, y] = clueSymbol + "/clue";
                             }
                             else
                             {
                                 cs[x, y] = "/clue";
                             }
                         }
-                        else if ((y == 1 || y == 2) && !IsClue(cs[x, y + 1]) && !cs[x, y].Contains("7"))
+                        else if ((y == 1 || y == 2) && !IsClue(cs[x, y + 1]))
                         {
-                            cs[x, y] += "/7";
+                            cs[x, y] += "/" + clueSymbol;
                         }
 
                     }
-                    else if (cs[x, y] == "7")
+                    else if (cs[x, y] == clueSymbol)
                     {
                         if (x == width - 1)
                         {
-                            cs[x, y] = "/7";
+                            cs[x, y] = "/" + clueSymbol;
                         }
                         else if (y < height - 1 && x < width - 1 && !IsClue(cs[x, y + 1]) && !IsClue(cs[x + 1, y]))
                         {
-                            cs[x, y] += "/7";
+                            cs[x, y] = clueSymbol + "/" + clueSymbol;
                         }
                         else if (y < height - 1 && x < width - 1 && IsClue(cs[x + 1, y]) && !IsClue(cs[x, y + 1]))
                         {
-                            cs[x, y] = "/7";
+                            cs[x, y] = "/" + clueSymbol;
                         }
                     }
-                    /*else if (cs[x, y] == "7/7")
-                    {
-                        if (x + 1 == width || (x + 1 < width && IsClue(cs[x + 1, y])))
-                        {
-                            cs[x, y] = "/7";
-                        }
-                        else if (x + 1 == width || y < height - 1 && !IsClue(cs[x, y + 1]))
-                        {
-                            cs[x, y] = "7";
-                        }
-                        else
-                        {
-
-                        }
-                    }*/
                 }
             }
             return cs;
@@ -564,7 +549,7 @@ namespace BAK
 
 
 
-        bool DeadEnd(string[,] cs, int x, int y)
+        bool DeadEndBorder(string[,] cs, int x, int y)
         {
             string[] containedLetters;
             string[] currentContainedLetters;
@@ -624,7 +609,7 @@ namespace BAK
                     {
                         containedLetters = t.Item1;
                         horizontalDirection = t.Item2;
-                        if (horizontalDirection && Match(currentContainedLettersHor, containedLetters)) //tyhle podmínky vyměnit za to, jestli jsou containedletters podmnožina currectcontainedLetters
+                        if (horizontalDirection && Match(currentContainedLettersHor, containedLetters)) 
                         {
                             Console.WriteLine(string.Join("", currentContainedLettersHor) + " " + string.Join("", containedLetters));
                             return true;
@@ -650,6 +635,8 @@ namespace BAK
                 return new List<string>();
             }
             List<string> shortestMatches = new List<string>();
+           shortestMatches.Add(string.Join("",containedLetters));//todo
+
             for (int len = pattern.Length - 1; len > 0; len--)
             {
                 StringBuilder sb = new StringBuilder(pattern);
@@ -739,7 +726,7 @@ namespace BAK
             return false;
         }
 
-        bool WordCanGoFromHere(string[,] cs) // existuje místo pro slova o délce 1 || je trojuhelnik legend
+        bool WordCanGoFromHere(string[,] cs) // neexistuje místo pro slova o délce 1 || je trojuhelnik legend
         {
             if (IsClue(cs[width - 1, height - 1])) return false;
 
@@ -749,12 +736,11 @@ namespace BAK
                 {
                     if (!IsClue(cs[x, y])) continue;
 
-                    if (x < width - 2 && IsClue(cs[x + 2, y])) return false;
+                    if (x < width - 2 && IsClue(cs[x + 2, y])) return false; 
                     if (y < height - 2 && IsClue(cs[x, y + 2])) return false;
                     if (x < width - 1 && y < height - 1 && IsClue(cs[x + 1, y]) && IsClue(cs[x, y + 1])) return false;
                     if (x == width - 1 && y + 1 < height && IsClue(cs[x, y + 1])) return false;
                     if (y == height - 1 && x + 1 < width && IsClue(cs[x + 1, y])) return false;
-
                 }
             }
             return true;
@@ -777,8 +763,8 @@ namespace BAK
                 List<Word> possibleWords = dictionary.SelectWords(usedWords, containedLetters, length, length2);
                 foreach (Word word in possibleWords)
                 {
-                    if (!CanPlaceBorder(cs, word, x, y, horizontalDirection)) continue;
-                    if (cs[x + word.word.Length, y - 1].Contains("7")) continue;
+                    if (!CanPlace(cs, word, x, y, horizontalDirection)) continue;
+                    if (cs[x + word.word.Length, y - 1].Contains(clueSymbol)) continue;
                     WordWrite(cs, word, x, y, horizontalDirection);
                     usedWords.Add(word);
                     return (cs, usedWords);
@@ -796,8 +782,8 @@ namespace BAK
                 List<Word> possibleWords = dictionary.SelectWords(usedWords, containedLetters, length, length2);
                 foreach (Word word in possibleWords)
                 {
-                    if (!CanPlaceBorder(cs, word, x, y, horizontalDirection)) continue;
-                    if (cs[x - 1, y + word.word.Length].Contains("7")) continue;
+                    if (!CanPlace(cs, word, x, y, horizontalDirection)) continue;
+                    if (cs[x - 1, y + word.word.Length].Contains(clueSymbol)) continue;
                     WordWrite(cs, word, x, y, horizontalDirection);
                     usedWords.Add(word);
                     return (cs, usedWords);
@@ -810,9 +796,9 @@ namespace BAK
         {
             if (x == 0)
             {
-                for (int i = 1; i < width; i++) //najdi si clue v tomto sloupku
+                for (int i = 1; i < width; i++) //najdi si clue v tomto sloupci
                 {
-                    if (cs[i, y].Contains("7"))
+                    if (cs[i, y].Contains(clueSymbol))
                     {
                         return (i, y);
                     }
@@ -822,7 +808,7 @@ namespace BAK
             {
                 for (int i = 1; i < height; i++)
                 {
-                    if (cs[x, i].Contains("7"))
+                    if (cs[x, i].Contains(clueSymbol))
                     {
                         return (x, i);
                     }
@@ -831,25 +817,23 @@ namespace BAK
             return (-1, -1);
         }
 
-        bool CanPlaceBorder(string[,] cs, Word word, int x, int y, bool horizontalDirection)
+        bool CanPlace(string[,] cs, Word word, int x, int y, bool horizontalDirection)
         {
             int length = word.word.Length;
-            if ((horizontalDirection && length == width - 1) || (!horizontalDirection && length == height - 1)) return true;
-
             if ((horizontalDirection && length == width - 3) || ((!horizontalDirection && length == height - 3))) return false; //nesmí na konci řádku/sloupku vznikat místo pro další slovo délky 1
-            if (1 + length < width && y > 1 && IsClue(cs[length + 1, y - 1]) && IsClue(cs[length + 1, y - 2])) return false; //nesmí být 3 legendy v pod sebou
-            if (length + 1 < height && x > 1 && IsClue(cs[x - 1, length + 1]) && IsClue(cs[x - 2, length + 1])) return false; // nesmí být 3 legendy vedle sebe
+            //if (1 + length < width && y > 1 && IsClue(cs[length + 1, y - 1]) && IsClue(cs[length + 1, y - 2])) return false; //todo chci je tady nebo ne?  //nesmí být 3 legendy v pod sebou
+            //if (length + 1 < height && x > 1 && IsClue(cs[x - 1, length + 1]) && IsClue(cs[x - 2, length + 1])) return false; // nesmí být 3 legendy vedle sebe
             if (y > 1 && length + 1 == width - 1 && IsClue(cs[width - 1, y - 1])) return false; // nesmí být 2 legendy nad sebou u pravého kraje
             if (x > 1 && length + 1 == height - 1 && IsClue(cs[x - 1, height - 1])) return false; // nesmí být 2 legendy u dolního hraje vedle sebe
             if (IsClue(cs[width - 1, height - 1]) || IsClue(cs[width - 1, height - 2]) || IsClue(cs[width - 2, height - 1])) return false;
             /*
-            if (horizontalDirection && cs[1 + word.word.Length, y] == "7" && cs[1 + word.word.Length, y - 1] == "7") return false;
-            if (!horizontalDirection && cs[x, 1 + word.word.Length] == "7" && cs[x - 1, 1 + word.word.Length] == "7") return false;
+            if (horizontalDirection && cs[1 + word.word.Length, y] == clueSymbol && cs[1 + word.word.Length, y - 1] == clueSymbol) return false;
+            if (!horizontalDirection && cs[x, 1 + word.word.Length] == clueSymbol && cs[x - 1, 1 + word.word.Length] == clueSymbol) return false;
             */
             return true;
         }
 
-        void Prevent1LetterWordsNearEnd(string[,] cs, bool horizontalDirection)
+        void PreventOneLetterWordsNearEnd(string[,] cs, bool horizontalDirection)
         {
             if (horizontalDirection)
             {
@@ -857,7 +841,7 @@ namespace BAK
                 {
                     if (IsClue(cs[i, height - 2]))
                     {
-                        cs[i, height - 1] = "7";
+                        cs[i, height - 1] = clueSymbol;
                     }
                 }
 
@@ -868,37 +852,24 @@ namespace BAK
                 {
                     if (IsClue(cs[width - 2, i]))
                     {
-                        cs[width - 1, i] = "7";
+                        cs[width - 1, i] = clueSymbol;
                     }
                 }
             }
 
         }
 
-        bool OneLetterWordInStart(string[,] cs)
-        {
-            for (int i = 1; i < width; i++)
-            {
-                if ((IsClue(cs[i, 2]) && !IsClue(cs[i, 1]))) return true;
-            }
-            for (int i = 1; i < height; i++)
-            {
-                if (IsClue(cs[2, i]) && !IsClue(cs[1, i])) return true;
-            }
-            return false;
-        }
-
         bool EndsWith1LetterWord(string[,] cs)
         {
             for (int i = 1; i < width; i++)
             {
-                if (cs[i, height - 2] == "7" && cs[i, height - 1] != "7") return true; // nebo 7/7?
+                if (cs[i, height - 2] == clueSymbol && cs[i, height - 1] != clueSymbol) return true; // nebo 7/7?
             }
             for (int i = 1; i < height; i++)
             {
-                if (cs[width - 2, i] == "7" && cs[width - 1, i] != "7") return true;
+                if (cs[width - 2, i] == clueSymbol && cs[width - 1, i] != clueSymbol) return true;
             }
-            if (cs[width - 1, height - 1].Contains("7")) return true;
+            if (cs[width - 1, height - 1].Contains(clueSymbol)) return true;
             return false;
         }
 
@@ -912,7 +883,7 @@ namespace BAK
                     {
                         return false;
                     }
-                    if (i > 0 && j > 0 && cs[i, j].Contains("7"))
+                    if (i > 0 && j > 0 && cs[i, j].Contains(clueSymbol))
                     {
                         return false;
                     }
@@ -966,7 +937,7 @@ namespace BAK
             {
                 for (int x = 1; x < width; x++)
                 {
-                    if (cs[x, y].Contains("clue") || cs[x, y].Contains("7"))
+                    if (cs[x, y].Contains("clue") || cs[x, y].Contains(clueSymbol))
                     {
                         if (cs[x, y].Contains("/clue"))
                         {
@@ -1001,7 +972,7 @@ namespace BAK
 
         public bool IsClue(string potentionalClue)
         {
-            return potentionalClue.Length > 1 || potentionalClue.Contains("clue") || potentionalClue.Contains("7") || potentionalClue.Contains("/");
+            return potentionalClue.Length > 1 || potentionalClue.Contains("clue") || potentionalClue.Contains(clueSymbol) || potentionalClue.Contains("/");
         }
 
         bool IsEverythingAlright(string[,] cs)
@@ -1010,7 +981,7 @@ namespace BAK
             {
                 for (int x = 0; x < width; x++)
                 {
-                    if ((x * y != 0 && cs[x, y] == " ") || cs[x, y].Contains("7") || cs[x, y].Contains("clue"))
+                    if ((x * y != 0 && cs[x, y] == " ") || cs[x, y].Contains(clueSymbol) || cs[x, y].Contains("clue"))
                     {
                         Console.WriteLine(x + " " + y);
                         return false;
@@ -1020,7 +991,7 @@ namespace BAK
             return true;
         }
 
-        public void zapisVysledek(string[,] cs)
+        public void zapisVysledek(string[,] cs) //test 
         {
 
             string dir = System.Environment.CurrentDirectory;

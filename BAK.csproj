@@ -60,8 +60,10 @@
   <ItemGroup>
     <Compile Include="Crossword.cs" />
     <Compile Include="CrosswordBritish.cs" />
+    <Compile Include="CrosswordSw.cs" />
     <Compile Include="CrosswordSwedish.cs" />
     <Compile Include="Dictionary.cs" />
+    <Compile Include="WeightedRNG.cs" />
     <Compile Include="Word.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

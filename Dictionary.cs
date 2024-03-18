@@ -18,6 +18,9 @@ namespace BAK
         int limit = 50;
         Dictionary<char, int> indexes;
 
+        string longestWord { get; set; } = "";
+
+
         public Dictionary(int maxLength)
         {
             SetDictionary(maxLength); 
@@ -33,7 +36,6 @@ namespace BAK
         public void SetDictionary(int maxLength)
         {
             SqlConnection con = new SqlConnection(conStr);
-
             con.Open();
             if (con.State == System.Data.ConnectionState.Open)
             {
@@ -46,6 +48,10 @@ namespace BAK
                 while (reader.Read())
                 {
                     string w = reader["word"].ToString();
+                    if (w.Length > longestWord.Length)
+                    {
+                        longestWord = w;
+                    }
                     string c = reader["clue"].ToString();
                     if (w.Length >= maxLength || w.Contains(" ") || w.Contains("-") || w.Contains("/") || w.Contains("-")) continue;
                     w = vymazCarky(w);
@@ -65,9 +71,12 @@ namespace BAK
             Random rnd = new Random();
             dictionary = dictionary.GroupBy(w => w.word)
                 .Select(s => s.First())
-                .OrderBy(w => w.word)
+                .OrderByDescending(w => w.word.Length)
                 .ToList();
-
+            /*foreach(Word w in dictionary)
+            {
+                w.Print();
+            }*/
 
             indexes = dictionary.Select((word, index) => new { Word = word, Index = index })
                 .GroupBy(item => item.Word.word[0])
@@ -284,6 +293,10 @@ namespace BAK
             return dictionary.Count;
         }
 
+        public string GetLongestWord()
+        {
+            return longestWord;
+        }
 
         public void VypsatSlovnik()
         {

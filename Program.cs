@@ -13,15 +13,15 @@ namespace BAK
 
         static void Main(string[] args)
         {
-            new CrosswordSwedish(15,15);
+            new CrosswordSw(15,15);
+
+        
+
+            //Dictionary d = new Dictionary(100);
 
 
-
-            //Dictionary d = new Dictionary(10);
-
-
-            //jsou impossiblepaths stejný?
-            // řešit u impossiblepaths i délku, protože třeba ŠV_ nenajde, ale pak by mohl být ŠVEC
         }
+
+
     }
 }

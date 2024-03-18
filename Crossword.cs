@@ -19,6 +19,7 @@ namespace BAK
         public string language { get; set; }
         public int difficulty { get; set; }
         public List<(string[] containedLetters, bool horizontalDirection)>[][] impossiblePathsList;
+        public string emptyField = " ";
 
 
         public Crossword(int width, int height)   //pak přidat jazyk
@@ -45,7 +46,7 @@ namespace BAK
             {
                 for (int j = 0; j < width; j++)
                 {
-                    crossword[j, i] = " ";
+                    crossword[j, i] = emptyField;
                 }
             }
             Generate();

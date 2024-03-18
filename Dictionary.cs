@@ -16,7 +16,7 @@ namespace BAK
         static string currentDirectory = System.Environment.CurrentDirectory;
         private string conStr = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=\"" + currentDirectory.Substring(0, currentDirectory.LastIndexOf("bin")) + "Directory.mdf\";Integrated Security=True"; //bude potřeba změnit, když přesunu soubor
         int limit = 50;
-        Dictionary<char, int> indexes;
+        Dictionary<char, int> indexes; //propably wont be used
 
         string longestWord { get; set; } = "";
 
@@ -73,10 +73,7 @@ namespace BAK
                 .Select(s => s.First())
                 .OrderByDescending(w => w.word.Length)
                 .ToList();
-            /*foreach(Word w in dictionary)
-            {
-                w.Print();
-            }*/
+
 
             indexes = dictionary.Select((word, index) => new { Word = word, Index = index })
                 .GroupBy(item => item.Word.word[0])

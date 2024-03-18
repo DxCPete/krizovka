@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -11,7 +12,9 @@ namespace BAK
     class CrosswordSw : Crossword
     {
         string clueSymbol = "7";
+        string clue = "clue";
         string[] cs;
+        Stack<string[]> stack = new Stack<string[]>();
         public CrosswordSw(int x, int y) : base(x, y)
         {
         }
@@ -19,32 +22,180 @@ namespace BAK
 
         public override void Generate()
         {
+            /*
+             mám pocit, že to přepisuje písmena
+             */
             cs = new string[width * height];
             InitCrosswordContraints();
+            dictionary = new Dictionary(LongestPossibleWord());
             FillWithWords();
-
+            To2DArray();
         }
+
 
         public void FillWithWords()
         {
-            (int, int, bool) t = FindWordStart();
+            string[] csClone = (string[])cs.Clone();
+            //List<Word> usedWords = new List<Word>(); //maybe useless
+            stack.Push(csClone);
+            int x;
+            int y;
+            bool horizontalDirection;
+
+            foreach (Word word in dictionary.dictionary)
+            {
+                csClone = (string[])stack.Pop();
+                PrintCs(csClone);
+
+                (int, int, bool) coordinates = FindWordStart(csClone, word);
+                x = coordinates.Item1;
+                y = coordinates.Item2;
+                horizontalDirection = coordinates.Item3;
+                if (x == -1)
+                {
+                    stack.Push(csClone);
+                    continue;
+                }
+                csClone = WriteWord(csClone, word, x, y, horizontalDirection);
+                stack.Push(csClone);
+
+            }
+        }
+        string[] WriteWord(string[] cs, Word word, int x, int y, bool horizontalDirection)
+        {
+            string[] wordLetters = word.word.Select(c => c.ToString()).ToArray();
+            cs = WriteClue(cs, word, x, y, horizontalDirection);
+            if (horizontalDirection)
+            {
+                for (int i = 1; i < wordLetters.Length; i++)
+                {
+                    cs[(x + i) * width + y] = wordLetters[i-1];
+                }
+            }
+            else
+            {
+                for (int i = 1; i < wordLetters.Length; i++)
+                {
+                    cs[x * width + y + 1] = wordLetters[i-1];
+                }
+            }
+
+            return cs;
         }
 
-        (int, int, bool) FindWordStart()
+        string[] WriteClue(string[] cs, Word word, int x, int y, bool horizontalDirection)
         {
-            return (0, 0, false);
+            if (horizontalDirection)
+            {
+                if (cs[x * width + y].Contains("/"))
+                {
+                    cs[x * width + y] = cs[x * width + y].Replace(clueSymbol + "/", clue + "/");
+                }
+                else
+                {
+                    cs[x * width + y] = cs[x * width + y].Replace(clueSymbol, clue);
+                }
+            }
+            else
+            {
+                cs[x * width + y] = cs[x * width + y].Replace("/" + clueSymbol, "/" + clue);
+            }
+            return cs;
+        }
+
+
+        (int, int, bool) FindWordStart(string[] cs, Word word)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    if (!cs[x * width + y].Contains(clueSymbol)) continue;
+                    if (cs[x * width + y].Contains("/" + clueSymbol))
+                    {
+                        if (CanPlace(cs, word, x, y, false))
+                        {
+                            return (x, y, false);
+                        }
+                    }
+                    else if (cs[x * width + y].Contains(clueSymbol))
+                    {
+                        if (CanPlace(cs, word, x, y, true))
+                        {
+                            return (x, y, true);
+                        }
+                    }
+                }
+            }
+
+            return (-1, -1, false);
+        }
+
+        bool CanPlace(string[] cs, Word word, int x, int y, bool horizontalDirection)
+        {
+            int i = 1;
+            string[] wordLetters = word.word.Select(c => c.ToString()).ToArray();
+            if (horizontalDirection)
+            {
+                while (i < wordLetters.Length && x + i < width && !cs[(x + i) * width + y].Contains(clueSymbol))
+                {
+                    if (wordLetters[i-1] != cs[(x + i) * width + y] && cs[(x + i) * width + y] != emptyField)
+                    {
+                        return false;
+                    }
+                    i++;
+                }
+            }
+            else
+            {
+                while (i < wordLetters.Length && y + i < height && !cs[x * width + y + i].Contains(clueSymbol))
+                {
+                    if (wordLetters[i-1] != cs[x * width + y + i] && cs[x * width + y + i] != emptyField)
+                    {
+                        return false;
+                    }
+                    i++;
+                }
+            }
+            if (i == wordLetters.Length)
+            {
+                return true;
+            }
+            return false;
         }
 
         int LongestPossibleWord()
         {
-            int max = 0;
+            int max = -1;
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
                     if (cs[x * width + y].Contains("/" + clueSymbol))
                     {
-                        while (y < height) ;
+                        int i = 1;
+                        while (y + i < height && !cs[x * width + y + i].Contains(clueSymbol))
+                        {
+                            i++;
+                        }
+                        if (i > max)
+                        {
+                            max = i;
+
+                        }
+                    }
+                    else if (cs[x * width + y].Contains(clueSymbol))
+                    {
+                        int i = 1;
+                        while (x + i < width && !cs[(x + i) * width + y].Contains(clueSymbol))
+                        {
+                            i++;
+                        }
+                        if (i > max)
+                        {
+                            max = i;
+
+                        }
                     }
                 }
             }
@@ -53,21 +204,31 @@ namespace BAK
 
         public void InitCrosswordContraints()
         {
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    cs[x * width + y] = emptyField;
+                }
+            }
+
             WeightedRNG rng = InitRNG();
             Console.WriteLine("FirstLines");
             FirstLines(rng);
-            Print();
+            PrintMainCs();
             if (width > 6)
             {
                 Console.WriteLine("Last Lines");
                 LastLines(rng);
             }
-            Print();
+            PrintMainCs();
             Console.WriteLine("InnerPart");
             InnerPart(rng);
-            Print();
+            PrintMainCs();
             Console.WriteLine("Finishing Touches");
             FinishingTouches();
+            PrintMainCs();
+
         }
 
         void FinishingTouches()
@@ -77,56 +238,88 @@ namespace BAK
                 for (int x = 1; x < width; x++)
                 {
                     if (cs[x * width + y] != clueSymbol) continue;
-                    if (x + 1 < width && y != height - 1 && crossword[x + 1, y] == clueSymbol)
+                    if (x + 1 < width && y != height - 1 && cs[(x + 1) * width + y] == clueSymbol)
                     {
-                        crossword[x, y] = emptyField;
+                        cs[x * width + y] = emptyField;
                     }
-                    if (x != width - 1 && y + 1 < height && crossword[x, y + 1] != clueSymbol)
+                    if (x != width - 1 && y + 1 < height && cs[x * width + y + 1] != clueSymbol)
                     {
-                        crossword[x, y] += "/" + clueSymbol;
+                        cs[x * width + y] += "/" + clueSymbol;
                     }
                     if (x == width - 1)
                     {
-                        crossword[x, y] = "/" + clueSymbol;
+                        cs[x * width + y] = "/" + clueSymbol;
                     }
 
-                    if (x == width - 1 && y + 1 < height && crossword[x, y + 1].Contains(clueSymbol))
+                    if (x == width - 1 && y + 1 < height && cs[x * width + y + 1].Contains(clueSymbol))
                     {
-                        if (crossword[x - 1, y].Contains(clueSymbol))
+                        if (cs[(x - 1) * width + y].Contains(clueSymbol))
                         {
-                            crossword[x, y + 1] = emptyField;
+                            cs[x * width + y + 1] = emptyField;
                         }
                         else
                         {
-                            crossword[x, y] = emptyField;
+                            cs[x * width + y] = emptyField;
                         }
                     }
-                    else if (y == height - 1 && x + 1 < width && crossword[x + 1, y].Contains(clueSymbol))
+                    else if (y == height - 1 && x + 1 < width && cs[(x + 1) * width + y].Contains(clueSymbol))
                     {
-                        if (crossword[x, y - 1].Contains(clueSymbol))
+                        if (cs[x * width + y - 1].Contains(clueSymbol))
                         {
-                            crossword[x + 1, y] = emptyField;
+                            cs[(x + 1) * width + y] = emptyField;
                         }
                         else
                         {
-                            crossword[x, y] = emptyField;
+                            cs[x * width + y] = emptyField;
                         }
                     }
                 }
             }
         }
 
+        void PrintCs(string[] cs)
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int y = 0; y < height; y += 1)
+            {
+                for (int x = 0; x < width; x += 1)
+                {
+                    sb.Append(cs[x * width + y] + " | ");
+                }
+
+                sb.AppendLine();
+            }
+            Console.WriteLine(sb.ToString());
+        }
+
+        public void PrintMainCs()
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int y = 0; y < height; y += 1)
+            {
+                for (int x = 0; x < width; x += 1)
+                {
+                    sb.Append(cs[x * width + y] + " | ");
+                }
+
+                sb.AppendLine();
+            }
+            Console.WriteLine(sb.ToString());
+        }
 
         void FirstLines(WeightedRNG rng)
         {
             for (int i = 1; i < width; i++)
             {
-                crossword[i, 0] = clueSymbol;
+                //crossword[i, 0] = clueSymbol;
+                cs[i * width + 0] = "/"+clueSymbol;
             }
 
             for (int i = 1; i < height; i++)
             {
-                crossword[0, i] = clueSymbol;
+                //crossword[0, i] = clueSymbol;
+                cs[0 * width + i] = clueSymbol;
+
             }
             int number;
             int index = 1;
@@ -135,9 +328,12 @@ namespace BAK
                 while ((number = rng.GetRandomNumber()) > width - 3 || number > 6 || index + number > width - 3) { }
                 index += number;
                 if (index > width - 3) break;
-                crossword[index, 0] = " ";
-                crossword[index, 1] = clueSymbol;
-                crossword[index, 2] = clueSymbol;
+                //crossword[index, 0] = " ";
+                cs[index * width + 0] = emptyField;
+                //crossword[index, 1] = clueSymbol;
+                cs[index * width + 1] = clueSymbol;
+                //crossword[index, 2] = clueSymbol;
+                cs[index * width + 2] = clueSymbol;
             }
             index = 1;
             while (index < height - Math.Max(rng.GetRandomNumber(), 6))
@@ -145,9 +341,12 @@ namespace BAK
                 while ((number = rng.GetRandomNumber()) > height - 3 || number > 6 || index + number > height - 3) { }
                 if (index > height - 3) break;
                 index += number;
-                crossword[0, index] = " ";
-                crossword[1, index] = clueSymbol;
-                crossword[2, index] = clueSymbol;
+                //crossword[0, index] = " ";
+                cs[0 * width + index] = emptyField;
+                //crossword[1, index] = clueSymbol;
+                cs[1 * width + index] = clueSymbol;
+                //crossword[2, index] = clueSymbol;
+                cs[2 * width + index] = clueSymbol;
 
             }
 
@@ -159,10 +358,10 @@ namespace BAK
             {
                 for (int x = rng.GetRandomNumber(); x < width; x++)
                 {
-                    if (x != width - 2 && y != height - 2 && crossword[x, y] != clueSymbol && (y - 2 >= 0 && crossword[x, y - 2] != clueSymbol) &&
-                        (x + 2 < width && crossword[x + 2, y] != clueSymbol) && (x - 2 >= 0 && crossword[x - 2, y] != clueSymbol))
+                    if (x != width - 2 && y != height - 2 && cs[x * width + y] != clueSymbol && (y - 2 >= 0 && cs[x * width + y - 2] != clueSymbol) &&
+                        (x + 2 < width && cs[(x + 2) * width + y] != clueSymbol) && (x - 2 >= 0 && cs[(x - 2) * width + y] != clueSymbol))
                     {
-                        crossword[x, y] = clueSymbol;
+                        cs[x * width + y] = clueSymbol;
                         x += rng.GetRandomNumber();
                     }
                 }
@@ -174,13 +373,13 @@ namespace BAK
                 for (int i = 0; i < height; i++)
                 {
                     int y = rng.GetRandomNumber();
-                    if (y < height && crossword[x, y] != clueSymbol && crossword[x - 1, y] != clueSymbol && crossword[x - 2, y] != clueSymbol &&
-                       (x + 1 < width && crossword[x + 1, y] != clueSymbol) && (x + 2 < width && crossword[x + 2, y] != clueSymbol)
-                        && crossword[x, y - 1] != clueSymbol && crossword[x, y - 2] != clueSymbol && (y + 1 < height && crossword[x, y + 1] != clueSymbol)
-                        && (y + 2 < height && crossword[x, y + 2] != clueSymbol))
+                    if (y < height && cs[x * width + y] != clueSymbol && cs[(x - 1) * width + y] != clueSymbol && cs[(x - 2) * width + y] != clueSymbol &&
+                       (x + 1 < width && cs[(x + 1) * width + y] != clueSymbol) && (x + 2 < width && cs[(x + 2) * width + y] != clueSymbol)
+                        && cs[x * width + y - 1] != clueSymbol && cs[x * width + y - 2] != clueSymbol && (y + 1 < height && cs[x * width + y + 1] != clueSymbol)
+                        && (y + 2 < height && cs[x * width + y + 2] != clueSymbol))
                     {
                         Console.WriteLine(x + " " + y);
-                        crossword[x, y] = clueSymbol;
+                        cs[x * width + y] = clueSymbol;
                     }
                 }
 
@@ -188,7 +387,7 @@ namespace BAK
                 bool hasClue = false;
                 for (int y = 2; y < height; y++)
                 {
-                    if (crossword[x, y] == clueSymbol)
+                    if (cs[x * width + y] == clueSymbol)
                     {
                         hasClue = true;
                         break;
@@ -200,10 +399,10 @@ namespace BAK
                     {
                         int y = rng.GetRandomNumber();
                         Console.WriteLine(x);
-                        if (y < height - 2 && (x - 2 < 0 || x - 2 >= 0 && crossword[x - 2, y] != clueSymbol)
-                            && (x + 2 >= width || (x + 2 < width && crossword[x + 2, y] != clueSymbol)))
+                        if (y < height - 2 && (x - 2 < 0 || x - 2 >= 0 && cs[(x - 2) * width + y] != clueSymbol)
+                            && (x + 2 >= width || (x + 2 < width && cs[(x + 2) * width + y] != clueSymbol)))
                         {
-                            crossword[x, y] = clueSymbol;
+                            cs[x * width + y] = clueSymbol;
                             break;
                         }
                     }
@@ -220,8 +419,11 @@ namespace BAK
                 while ((number = rng.GetRandomNumber()) > width - 2 || number > 6) { }
                 index += number;
                 if (index > width - 3) break;
-                crossword[index, height - 2] = clueSymbol;
-                crossword[index, height - 1] = clueSymbol;
+                cs[index * width + height - 2] = clueSymbol;
+                //crossword[index, height - 2] = clueSymbol;
+                //crossword[index, height - 1] = clueSymbol;
+                cs[index * width + height - 1] = clueSymbol;
+
             }
             index = 1;
             while (index < height - Math.Max(rng.GetRandomNumber(), 6))
@@ -229,8 +431,10 @@ namespace BAK
                 while ((number = rng.GetRandomNumber()) > height - 2 || number > 6) { }
                 index += number;
                 if (index > height - 3) break;
-                crossword[width - 2, index] = clueSymbol;
-                crossword[width - 1, index] = clueSymbol;
+                //crossword[width - 2, index] = clueSymbol;
+                cs[(width - 2) * width + index] = clueSymbol;
+                cs[(width - 1) * width + index] = clueSymbol;
+                //crossword[width - 1, index] = clueSymbol;
             }
         }
 
@@ -256,9 +460,19 @@ namespace BAK
             {
                 rng.AddNumber(list[i].Number, list[i].Weight);
             }
-
-
             return rng;
+        }
+
+        public void To2DArray()
+        {
+            for (int y = 0; y < height; y += 1)
+            {
+                for (int x = 0; x < width; x += 1)
+                {
+                    crossword[x, y] = cs[x * width + y];
+                }
+
+            }
         }
     }
 }

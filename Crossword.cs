@@ -8,7 +8,6 @@ using System.Threading;
 
 namespace BAK
 {
-    /* "7" je dočasná náhrada za LEGENDU */
     class Crossword
     {
         public string[,] crossword { get; set; }

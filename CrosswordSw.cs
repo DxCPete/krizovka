@@ -16,7 +16,7 @@ namespace BAK
         string clueSymbol = "7";
         string clue = "clue";
         string[] cs;
-        Stack<string[]> stack = new Stack<string[]>();
+        Stack<(string[], List<Word>)> stack = new Stack<(string[], List<Word>)>();
 
         int longestWordLength = 0;
         int pocetNesplnitelnychCest = 0;
@@ -46,46 +46,100 @@ namespace BAK
         int counterTest = 0;
         public void FillWithWords()
         {
-            string[] csClone = (string[])cs.Clone();
-            //List<Word> usedWords = new List<Word>(); //probably useless
-            stack.Push(csClone);
+            stack.Push((cs, new List<Word>()));
             int x;
             int y;
             bool horizontalDirection;
+
             while (stack.Count > 0)
             {
-                foreach (Word word in dictionary.wordsList)
+                (string[], List<Word>) st = stack.Pop();
+                string[] currentCs = (string[])st.Item1.Clone();
+                List<Word> usedWords = st.Item2;
+                (int, int, bool) coordinates = NextCoordinates(currentCs);
+                x = coordinates.Item1;
+                if (x == -1)
                 {
+                    if (IsFinished(currentCs))
+                    {
+                        PrintCs(currentCs);
+                        cs = currentCs;
+                        return;
+                    }
+                    continue;
+                }
+                y = coordinates.Item2;
+                horizontalDirection = coordinates.Item3;
+                if (DeadEnd(cs, x, y))
+                {
+                    break;
+                }
+                string[] containedLetters = ContainedLetters(currentCs, x, y, horizontalDirection);
+                List<Word> possibleWords = dictionary.SelectWordsNew(usedWords, containedLetters);
+                foreach (Word word in possibleWords)
+                {
+                    string[] csClone = (string[])currentCs.Clone();
+                    List<Word> usedWordsClone = usedWords.ToList();
                     counterTest++;
-                    csClone = (string[])stack.Pop();
-                    PrintCs(csClone);
-                    if (DeadEnd(cs, 0, 0))
-                    {
-                        break;
-                    }
-
-                    (int, int, bool) coordinates = FindWordStart(csClone, word);
-                    x = coordinates.Item1;
-                    y = coordinates.Item2;
-                    horizontalDirection = coordinates.Item3;
-                    if (x == -1)
-                    {
-                        if (IsFinished(csClone))
-                        {
-                            cs = csClone;
-                            return;
-                        }
-                        stack.Push(csClone);
-                        continue;
-                        // if x == -2.... křížovka je plná? 
-                    }
                     WriteWord(csClone, word, x, y, horizontalDirection);
+                    usedWordsClone.Add(word);
                     PrintCs(csClone);
-                    stack.Push(csClone);
+                    stack.Push((csClone, usedWordsClone));
+                }
+                if (possibleWords.Count == 0)
+                {
+                    if (!DeadEndAlreadyFound(currentCs, x, y, horizontalDirection)) //kontrola, že to ještě není uložené na impossiblePathsList
+                    {
+                        pocetNesplnitelnychCest++;
+                        containedLetters = GetMinimalImposibilePath(containedLetters);
+                        impossiblePathsList[x][y].Add((containedLetters, horizontalDirection));
+                    }
+                }
+                //FindDeadEnds(currentCs);
+            }
+            Console.WriteLine("Nepovedlo se");
+            /*projít si všechna neobsažená místa a zkusit je dát do DeadEnd
+             to už asi není potřeba (NonexistantWord)*/
+        }
+
+        (int, int, bool) NextCoordinates(string[] cs)
+        {
+            int random = new Random().Next();
+            if (random % 2 == 0)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        if (cs[x * width + y].Contains("/" + clueSymbol))
+                        {
+                            return (x, y, false);
+                        }
+                        if (cs[x * width + y].Contains(clueSymbol))
+                        {
+                            return (x, y, true);
+                        }
+                    }
                 }
             }
-            FindDeadEnds(csClone);
-            /*projít si všechna neobsažená místa a zkusit je dát do DeadEnd*/
+            else
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    for (int y = 0; y < height; y++)
+                    {
+                        if (cs[x * width + y].Contains("/" + clueSymbol))
+                        {
+                            return (x, y, false);
+                        }
+                        if (cs[x * width + y].Contains(clueSymbol))
+                        {
+                            return (x, y, true);
+                        }
+                    }
+                }
+            }
+            return (-1, -1, false);
         }
 
         bool IsFinished(string[] cs)
@@ -94,7 +148,7 @@ namespace BAK
             {
                 for (int x = 0; x < width; x++)
                 {
-                    if (cs[x * width + y] == emptyField)
+                    if (cs[x * width + y] == emptyField || cs[x * width + y].Contains(clueSymbol))
                     {
                         return false;
                     }
@@ -143,7 +197,6 @@ namespace BAK
                 cs[x * width + y] = cs[x * width + y].Replace("/" + clueSymbol, "/" + clue);
             }
             PrintCs(cs);
-            Console.WriteLine(cs[x * width + y]);
             return cs;
         }
 
@@ -176,9 +229,36 @@ namespace BAK
         }
         bool DeadEnd(string[] cs, int x, int y)
         {
-            return DeadEndBorder(cs, x, y) && DeadEndInner(cs, x, y);
+            return /*ContainsNonexistantWord(cs) &&*/ DeadEndBorder(cs, x, y) && DeadEndInner(cs, x, y);
         }
 
+        bool ContainsNonexistantWord(string[] cs)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    if (!cs[x * width + y].Contains(clueSymbol)) continue;
+                    if (cs[x * width + y].Contains("/" + clueSymbol))
+                    {
+                        string[] containedLetters = ContainedLetters(cs, x, y, false);
+                        if (dictionary.ImpossibleToSelect(ContainedLetters(cs, x, y, false)))
+                        {
+                            return true;
+                        }
+                    }
+                    if (cs[x * width + y] == clueSymbol || cs[x * width + y] == clueSymbol + "/" + clueSymbol)
+                    {
+                        string[] containedLetters = ContainedLetters(cs, x, y, false);
+                        if (dictionary.ImpossibleToSelect(ContainedLetters(cs, x, y, true)))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
 
 
         bool DeadEndBorder(string[] cs, int x, int y)
@@ -435,7 +515,7 @@ namespace BAK
         }
         public int GetMaxWordLength(string[] cs, int x, int y, bool horizontalDirection)
         {
-            int i = 0;
+            int i = 1;
             if (horizontalDirection)
             {
                 while (x + i < width && !IsClue(cs[(x + i) * width + y]))
@@ -451,7 +531,6 @@ namespace BAK
                     i++;
                 }
             }
-            Console.WriteLine(i);
             return i;
         }
 
@@ -641,17 +720,17 @@ namespace BAK
 
         void PrintCs(string[] cs)
         {
-            StringBuilder sb = new StringBuilder();
-            for (int y = 0; y < height; y += 1)
-            {
-                for (int x = 0; x < width; x += 1)
-                {
-                    sb.Append(cs[x * width + y].Replace("7/7", "7").Replace("/7", "7") + " | ");
-                }
+            /* StringBuilder sb = new StringBuilder();
+             for (int y = 0; y < height; y += 1)
+             {
+                 for (int x = 0; x < width; x += 1)
+                 {
+                     sb.Append(cs[x * width + y].Replace("7/7", "7").Replace("/7", "7") + " | ");
+                 }
 
-                sb.AppendLine();
-            }
-            Console.WriteLine(sb.ToString());
+                 sb.AppendLine();
+             }
+             Console.WriteLine(sb.ToString());*/
         }
 
         public void PrintMainCs()

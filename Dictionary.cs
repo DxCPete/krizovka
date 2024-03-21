@@ -53,7 +53,7 @@ namespace BAK
                         longestWord = w;
                     }
                     string c = reader["clue"].ToString();
-                    if (w.Length > maxLength || w.Contains(" ") || w.Contains("-") || w.Contains("/") || w.Contains("-")) continue;
+                    if (w.Length > maxLength || w.Contains(" ") || w.Contains("-") || w.Contains("/") || w.Contains("-") || w.Contains("&")) continue;
                     w = vymazCarky(w);
                     wordsList.Add(new Word(w, c));
                     n++;
@@ -76,46 +76,33 @@ namespace BAK
                 .ToList();
 
 
-            /*indexes = wordsList.Select((word, index) => new { Word = word, Index = index })
+            indexes = wordsList.Select((word, index) => new { Word = word, Index = index })
                 .GroupBy(item => item.Word.word[0])
                 .ToDictionary(group => group.Key, group => group.First().Index);
-            */
             }
 
 
 
         public List<Word> SelectWords(List<Word> usedWords, string[] containedLetters) //ten hlavní
         {
-            Word w = new Word(string.Concat(containedLetters), "");
-            int startIndex = 0;
-            try
-            {
-                if (Char.IsLetter(char.Parse(containedLetters[0])))
-                {
-                    startIndex = indexes[char.Parse(containedLetters[0])];
-                }
-                else
-                {
-                    startIndex = new Random().Next(startIndex, wordsList.Count - 1000);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(containedLetters[0]);
-                Console.WriteLine(ex);
-                throw new Exception("uz zas");
-            }
-
-           
+            Word w = new Word(string.Concat(containedLetters), "");          
             List<Word> wordsFiltered = wordsList.AsParallel()
-                .Skip(startIndex)
                 .Except(usedWords.AsParallel())
                 .Where(word => comparer.Equals(word, w))
                 .Take(limit)
                 .ToList();
             return wordsFiltered;
         }
-
+        public List<Word> SelectWordsNew(List<Word> usedWords, string[] containedLetters) //ten hlavní
+        {
+            Word w = new Word(string.Concat(containedLetters), "");
+            List<Word> wordsFiltered = wordsList.AsParallel()
+                .Except(usedWords.AsParallel())
+                .Where(word => comparer.EqualsNew(word, w))
+                //.Take(limit)
+                .ToList();
+            return wordsFiltered;
+        }
         public List<Word> SelectWords(List<Word> usedWords, string[] wordContains, int length1, int length2)
         {
             Word w = new Word(string.Concat(wordContains), "");
@@ -126,6 +113,7 @@ namespace BAK
                 .ToList();
             return wordsFiltered;
         }
+
 
         public Word GetRightClue(List<Word> usedWords, string[] wordContains)
         {
@@ -193,11 +181,11 @@ namespace BAK
         }
 
 
-        public bool ImpossibleToSelect(string[] wordContains)
+        public bool ImpossibleToSelect(string[] wordContains) //update kvůli CrosswordSw
         {
             Word w = new Word(string.Concat(wordContains), "");
             Random rnd = new Random();
-            List<Word> wordsFiltered = wordsList.Where(word => comparer.StartsWith(word, w))
+            List<Word> wordsFiltered = wordsList.Where(word => comparer.Contains(word, wordContains))
                 .Take(1)
                 .ToList();
             return (wordsFiltered.Count == 0);

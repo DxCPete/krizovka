@@ -78,15 +78,7 @@ namespace BAK
             }
 
             List<Word> possibleWords;
-           /* if (x == 1 || y == 1)
-            {
-                possibleWords = dictionary.SelectWords(currentUsedWords, containedLetters);
-            }
-            else if (y == height - 1 || x == width - 1)
-            {
-                possibleWords = dictionary.SelectWords(currentUsedWords, containedLetters);//, MaxLength(currentCs, x, y, horizontalDirection) - 1);
-            }
-            else */if (y == 2 || x == 2)
+            if (y == 2 || x == 2)
             {
                 int length;
                 int length1stWord;
@@ -609,7 +601,7 @@ namespace BAK
                     {
                         containedLetters = t.Item1;
                         horizontalDirection = t.Item2;
-                        if (horizontalDirection && Match(currentContainedLettersHor, containedLetters)) 
+                        if (horizontalDirection && Match(currentContainedLettersHor, containedLetters))
                         {
                             Console.WriteLine(string.Join("", currentContainedLettersHor) + " " + string.Join("", containedLetters));
                             return true;
@@ -635,7 +627,7 @@ namespace BAK
                 return new List<string>();
             }
             List<string> shortestMatches = new List<string>();
-           shortestMatches.Add(string.Join("",containedLetters));//todo
+            shortestMatches.Add(string.Join("", containedLetters));//todo
 
             for (int len = pattern.Length - 1; len > 0; len--)
             {
@@ -736,7 +728,7 @@ namespace BAK
                 {
                     if (!IsClue(cs[x, y])) continue;
 
-                    if (x < width - 2 && IsClue(cs[x + 2, y])) return false; 
+                    if (x < width - 2 && IsClue(cs[x + 2, y])) return false;
                     if (y < height - 2 && IsClue(cs[x, y + 2])) return false;
                     if (x < width - 1 && y < height - 1 && IsClue(cs[x + 1, y]) && IsClue(cs[x, y + 1])) return false;
                     if (x == width - 1 && y + 1 < height && IsClue(cs[x, y + 1])) return false;

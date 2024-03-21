@@ -25,9 +25,9 @@ namespace BAK
         }
 
 
-        public bool StartsWith(Word kandidat, Word contains)
+        public bool StartsWith(Word candidate, Word contains)
         {
-            return (kandidat.word.StartsWith(contains.word));
+            return (candidate.word.StartsWith(contains.word));
         }
 
         public bool Contains(Word kandidat, string[] slovoObsahuje)
@@ -41,6 +41,46 @@ namespace BAK
                 return CanUseThisWord(kandidat, slovoObsahuje);
             }
         }
+
+
+        public bool EqualsNew(Word candidate, Word obsahuje)
+        {
+            if (candidate.word.Equals(obsahuje.word))
+            {
+                return true;
+            }
+            else
+            {
+                string[] slovoObsahuje = obsahuje.word.ToCharArray().Select(c => c.ToString()).ToArray(); //převede string na string[]
+                return CanUseThisWordNew(candidate, slovoObsahuje);
+            }
+        }
+
+        public bool CanUseThisWordNew(Word candidate, string[] wordContains)
+        {
+            int n = candidate.word.Length;
+            int n2 = wordContains.Length;
+            if (n != n2) return false;
+
+            int i = 0;
+            //Console.WriteLine(candidate.word);
+            while (i < n && char.IsLetter(candidate.word[i]))
+            {
+                // Console.WriteLine(candidate.word[i].ToString() + " " + wordContains[i]);
+                if (candidate.word[i].ToString() != wordContains[i] && (wordContains[i] != "_" || wordContains[i] == " "))
+                {
+                    return false;
+                }
+                i++;
+            }
+
+            /* string[] newA = wordContains.Skip(i).ToArray();
+             int errorCounter = Regex.Matches(string.Concat(newA), @"[\p{Lu}\p{L}ÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]").Count;
+             if (errorCounter > 0) return false;
+             */
+            return true;
+        }
+
 
         public bool CanUseThisWord(Word candidate, string[] wordContains)
         {

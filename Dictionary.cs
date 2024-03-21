@@ -9,7 +9,7 @@ namespace BAK
     class Dictionary
     {
 
-        public List<Word> dictionary { get; set; } = new List<Word>();
+        public List<Word> wordsList { get; set; } = new List<Word>();
         public bool languageCzech { get; set; } = true;
         public int difficulty { get; set; } = 1;
         private WordComparer comparer { get; } = new WordComparer();
@@ -18,7 +18,7 @@ namespace BAK
         int limit = 50;
         Dictionary<char, int> indexes; //propably wont be used
 
-        string longestWord { get; set; } = "";
+        private string longestWord { get; set; } = ""; 
 
 
         public Dictionary(int maxLength)
@@ -53,9 +53,9 @@ namespace BAK
                         longestWord = w;
                     }
                     string c = reader["clue"].ToString();
-                    if (w.Length >= maxLength || w.Contains(" ") || w.Contains("-") || w.Contains("/") || w.Contains("-")) continue;
+                    if (w.Length > maxLength || w.Contains(" ") || w.Contains("-") || w.Contains("/") || w.Contains("-")) continue;
                     w = vymazCarky(w);
-                    dictionary.Add(new Word(w, c));
+                    wordsList.Add(new Word(w, c));
                     n++;
                 }
                 Console.WriteLine(n);
@@ -69,16 +69,18 @@ namespace BAK
             }
 
             Random rnd = new Random();
-            dictionary = dictionary.GroupBy(w => w.word)
+            //wordsList = wordsList náhodně zamíchat
+            wordsList = wordsList.GroupBy(w => w.word)
                 .Select(s => s.First())
                 .OrderByDescending(w => w.word.Length)
                 .ToList();
 
 
-            indexes = dictionary.Select((word, index) => new { Word = word, Index = index })
+            /*indexes = wordsList.Select((word, index) => new { Word = word, Index = index })
                 .GroupBy(item => item.Word.word[0])
                 .ToDictionary(group => group.Key, group => group.First().Index);
-        }
+            */
+            }
 
 
 
@@ -94,7 +96,7 @@ namespace BAK
                 }
                 else
                 {
-                    startIndex = new Random().Next(startIndex, dictionary.Count - 1000);
+                    startIndex = new Random().Next(startIndex, wordsList.Count - 1000);
                 }
             }
             catch (Exception ex)
@@ -105,7 +107,7 @@ namespace BAK
             }
 
            
-            List<Word> wordsFiltered = dictionary.AsParallel()
+            List<Word> wordsFiltered = wordsList.AsParallel()
                 .Skip(startIndex)
                 .Except(usedWords.AsParallel())
                 .Where(word => comparer.Equals(word, w))
@@ -117,7 +119,7 @@ namespace BAK
         public List<Word> SelectWords(List<Word> usedWords, string[] wordContains, int length1, int length2)
         {
             Word w = new Word(string.Concat(wordContains), "");
-            List<Word> wordsFiltered = dictionary.AsParallel()
+            List<Word> wordsFiltered = wordsList.AsParallel()
                 .Except(usedWords.AsParallel())
                 .Where(word => comparer.Equals(word, w) && (word.word.Length == length1 || word.word.Length == length2))
                 .Take(limit)
@@ -147,7 +149,7 @@ namespace BAK
             string lettersContained = string.Concat(wordContains);
             lettersContained = lettersContained.Substring(0, Math.Min(maxLength, lettersContained.Length));
             Word word = new Word(lettersContained, "");
-            List<Word> wordsFiltered = dictionary.Except(usedWords)
+            List<Word> wordsFiltered = wordsList.Except(usedWords)
                 .AsParallel()
                 .Where(w => comparer.Equals(w, word) && w.word.Length < maxLength && w.word.Length > 2).Take(20) //limit
                 .ToList();
@@ -184,7 +186,7 @@ namespace BAK
         {
             Word w = new Word(containedLetters, "");
             Random rnd = new Random();
-            List<Word> wordsFiltered = dictionary.Where(word => comparer.StartsWith(word, w))
+            List<Word> wordsFiltered = wordsList.Where(word => comparer.StartsWith(word, w))
                 .Take(1)
                 .ToList();
             return (wordsFiltered.Count == 0);
@@ -195,7 +197,7 @@ namespace BAK
         {
             Word w = new Word(string.Concat(wordContains), "");
             Random rnd = new Random();
-            List<Word> wordsFiltered = dictionary.Where(word => comparer.StartsWith(word, w))
+            List<Word> wordsFiltered = wordsList.Where(word => comparer.StartsWith(word, w))
                 .Take(1)
                 .ToList();
             return (wordsFiltered.Count == 0);
@@ -205,7 +207,7 @@ namespace BAK
         {
             Word w = new Word(string.Concat(wordContains), "");
             Random rnd = new Random();
-            List<Word> wordsFiltered = dictionary.Where(word => comparer.Equals(word, w))
+            List<Word> wordsFiltered = wordsList.Where(word => comparer.Equals(word, w))
                 .Take(1)
                 .ToList();
             return (wordsFiltered.Count == 0);
@@ -219,7 +221,7 @@ namespace BAK
             int n = 0;
             if (con.State == System.Data.ConnectionState.Open)
             {
-                foreach (Word w in dictionary)
+                foreach (Word w in wordsList)
                 {
                     if (w.word.Contains(" ") || w.word.Contains("-") || w.word.Contains(",") || w.word.Contains(".")) continue;
                     if (w.word.StartsWith("A ") || w.word.StartsWith("AN ") || w.word.StartsWith("THE "))
@@ -263,31 +265,31 @@ namespace BAK
                 {
                     word = line.Substring(0, line.IndexOf(" "));
                     clue = line.Substring(line.IndexOf(" "));
-                    dictionary.Add(new Word(word, clue));
+                    wordsList.Add(new Word(word, clue));
                 }
             }
         }
 
        public Word TestGetWord(string clue)
         {
-            return (Word)dictionary.Where(w => w.clue.Equals(clue))
+            return (Word)wordsList.Where(w => w.clue.Equals(clue))
                 .First();
         }
 
 
         public void Remove(Word word)
         {
-            dictionary.Remove(word);
+            wordsList.Remove(word);
         }
 
         public void Add(Word word)
         {
-            dictionary.Add(word);
+            wordsList.Add(word);
         }
 
         public int Length()
         {
-            return dictionary.Count;
+            return wordsList.Count;
         }
 
         public string GetLongestWord()
@@ -297,7 +299,7 @@ namespace BAK
 
         public void VypsatSlovnik()
         {
-            foreach (Word s in dictionary)
+            foreach (Word s in wordsList)
             {
                 s.Print();
             }

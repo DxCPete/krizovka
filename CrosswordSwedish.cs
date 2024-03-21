@@ -670,7 +670,7 @@ namespace BAK
             // Přidání hranic slov pro přesné vyhledání slova
             regexPattern = @"\b" + regexPattern + @"\b";
 
-            return dictionary.dictionary.AsParallel().Any(w => Regex.IsMatch(w.word, regexPattern));
+            return dictionary.wordsList.AsParallel().Any(w => Regex.IsMatch(w.word, regexPattern));
         }
 
         public bool Match(string[] currentContainedLetters, string[] containedLetters)

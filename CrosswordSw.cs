@@ -15,6 +15,9 @@ namespace BAK
         string clue = "clue";
         string[] cs;
         Stack<string[]> stack = new Stack<string[]>();
+
+        int longestWordLength = 0;
+
         public CrosswordSw(int x, int y) : base(x, y)
         {
         }
@@ -26,25 +29,29 @@ namespace BAK
              mám pocit, že to přepisuje písmena
              */
             cs = new string[width * height];
-            InitCrosswordContraints();
+            do
+            {
+                InitCrosswordContraints();
+            } while (CrosswordContraintsAreRight()); //ještě není hotová
+            longestWordLength = LongestPossibleWord();
             dictionary = new Dictionary(LongestPossibleWord());
             FillWithWords();
             To2DArray();
         }
 
 
+
         public void FillWithWords()
         {
             string[] csClone = (string[])cs.Clone();
             //List<Word> usedWords = new List<Word>(); //maybe useless
-            stack.Push(csClone);
+            //stack.Push(csClone);
             int x;
             int y;
             bool horizontalDirection;
-
-            foreach (Word word in dictionary.dictionary)
+            foreach (Word word in dictionary.wordsList)
             {
-                csClone = (string[])stack.Pop();
+                //csClone = (string[])stack.Pop();
                 PrintCs(csClone);
 
                 (int, int, bool) coordinates = FindWordStart(csClone, word);
@@ -53,30 +60,31 @@ namespace BAK
                 horizontalDirection = coordinates.Item3;
                 if (x == -1)
                 {
-                    stack.Push(csClone);
+                    // stack.Push(csClone);
                     continue;
+                    // if x == -2.... křížovka je plná? 
                 }
-                csClone = WriteWord(csClone, word, x, y, horizontalDirection);
-                stack.Push(csClone);
-
+                WriteWord(csClone, word, x, y, horizontalDirection);
+                PrintCs(csClone);
+                //stack.Push(csClone);
             }
         }
         string[] WriteWord(string[] cs, Word word, int x, int y, bool horizontalDirection)
         {
             string[] wordLetters = word.word.Select(c => c.ToString()).ToArray();
-            cs = WriteClue(cs, word, x, y, horizontalDirection);
+            WriteClue(cs, word, x, y, horizontalDirection);
             if (horizontalDirection)
             {
-                for (int i = 1; i < wordLetters.Length; i++)
+                for (int i = 0; i < wordLetters.Length; i++)
                 {
-                    cs[(x + i) * width + y] = wordLetters[i-1];
+                    cs[(x + i + 1) * width + y] = wordLetters[i];
                 }
             }
             else
             {
-                for (int i = 1; i < wordLetters.Length; i++)
+                for (int i = 0; i < wordLetters.Length; i++)
                 {
-                    cs[x * width + y + 1] = wordLetters[i-1];
+                    cs[x * width + y + i + 1] = wordLetters[i];
                 }
             }
 
@@ -100,6 +108,8 @@ namespace BAK
             {
                 cs[x * width + y] = cs[x * width + y].Replace("/" + clueSymbol, "/" + clue);
             }
+            PrintCs(cs);
+            Console.WriteLine(cs[x * width + y]);
             return cs;
         }
 
@@ -133,40 +143,44 @@ namespace BAK
 
         bool CanPlace(string[] cs, Word word, int x, int y, bool horizontalDirection)
         {
-            int i = 1;
+            //hlídat, že slovo není kratší než má být
+            int i = 0;
             string[] wordLetters = word.word.Select(c => c.ToString()).ToArray();
             if (horizontalDirection)
             {
-                while (i < wordLetters.Length && x + i < width && !cs[(x + i) * width + y].Contains(clueSymbol))
+                while (i < wordLetters.Length && x + i + 1 < width && (wordLetters[i] == cs[(x + i + 1) * width + y] || cs[(x + i + 1) * width + y] == emptyField))
                 {
-                    if (wordLetters[i-1] != cs[(x + i) * width + y] && cs[(x + i) * width + y] != emptyField)
-                    {
-                        return false;
-                    }
                     i++;
+                }
+                if (x + i + 1 != width && !IsClue(cs[(x + i + 1) * width + y]))
+                {
+                    return false;
                 }
             }
             else
             {
-                while (i < wordLetters.Length && y + i < height && !cs[x * width + y + i].Contains(clueSymbol))
+                while (i < wordLetters.Length && y + i + 1 < height && (wordLetters[i] == cs[x * width + y + i + 1] || cs[x * width + y + i + 1] == emptyField))
                 {
-                    if (wordLetters[i-1] != cs[x * width + y + i] && cs[x * width + y + i] != emptyField)
-                    {
-                        return false;
-                    }
                     i++;
                 }
+                if (y + i + 1 != height && !IsClue(cs[x * width + y + i + 1]))
+                {
+                    return false;
+                }
             }
+            //i--;
             if (i == wordLetters.Length)
             {
                 return true;
             }
+
             return false;
         }
 
         int LongestPossibleWord()
         {
             int max = -1;
+            PrintMainCs();
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
@@ -178,8 +192,10 @@ namespace BAK
                         {
                             i++;
                         }
+                        i--;
                         if (i > max)
                         {
+                            Console.WriteLine(x + " " + y + " " + false);
                             max = i;
 
                         }
@@ -191,8 +207,10 @@ namespace BAK
                         {
                             i++;
                         }
+                        i--;
                         if (i > max)
                         {
+                            Console.WriteLine(x + " " + y + " " + true);
                             max = i;
 
                         }
@@ -200,6 +218,24 @@ namespace BAK
                 }
             }
             return max;
+        }
+
+        bool IsClue(string field)
+        {
+            return field.Contains(clueSymbol) || field.Contains(clue);
+        }
+
+        bool CrosswordContraintsAreRight()
+        {
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    
+                }
+            }
+            //nesmí existovat slova délky 1 a legendy, ze kterých nemůže vést žádné slovo
+            return false;
         }
 
         public void InitCrosswordContraints()
@@ -284,7 +320,7 @@ namespace BAK
             {
                 for (int x = 0; x < width; x += 1)
                 {
-                    sb.Append(cs[x * width + y] + " | ");
+                    sb.Append(cs[x * width + y].Replace("7/7", "7").Replace("/7", "7") + " | ");
                 }
 
                 sb.AppendLine();
@@ -312,7 +348,7 @@ namespace BAK
             for (int i = 1; i < width; i++)
             {
                 //crossword[i, 0] = clueSymbol;
-                cs[i * width + 0] = "/"+clueSymbol;
+                cs[i * width + 0] = "/" + clueSymbol;
             }
 
             for (int i = 1; i < height; i++)

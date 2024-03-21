@@ -17,6 +17,7 @@ namespace BAK
             new CrosswordSw(15,15);
 
 
+            //pořád se stává, že je místo o délce 1
 
 
 

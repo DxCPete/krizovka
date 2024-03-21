@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace BAK
@@ -17,6 +19,7 @@ namespace BAK
         Stack<string[]> stack = new Stack<string[]>();
 
         int longestWordLength = 0;
+        int pocetNesplnitelnychCest = 0;
 
         public CrosswordSw(int x, int y) : base(x, y)
         {
@@ -32,7 +35,7 @@ namespace BAK
             do
             {
                 InitCrosswordContraints();
-            } while (CrosswordContraintsAreRight()); //ještě není hotová
+            } while (!CrosswordContraintsComplied()); //hotova jen z casti
             longestWordLength = LongestPossibleWord();
             dictionary = new Dictionary(LongestPossibleWord());
             FillWithWords();
@@ -40,35 +43,66 @@ namespace BAK
         }
 
 
-
+        int counterTest = 0;
         public void FillWithWords()
         {
             string[] csClone = (string[])cs.Clone();
-            //List<Word> usedWords = new List<Word>(); //maybe useless
-            //stack.Push(csClone);
+            //List<Word> usedWords = new List<Word>(); //probably useless
+            stack.Push(csClone);
             int x;
             int y;
             bool horizontalDirection;
-            foreach (Word word in dictionary.wordsList)
+            while (stack.Count > 0)
             {
-                //csClone = (string[])stack.Pop();
-                PrintCs(csClone);
-
-                (int, int, bool) coordinates = FindWordStart(csClone, word);
-                x = coordinates.Item1;
-                y = coordinates.Item2;
-                horizontalDirection = coordinates.Item3;
-                if (x == -1)
+                foreach (Word word in dictionary.wordsList)
                 {
-                    // stack.Push(csClone);
-                    continue;
-                    // if x == -2.... křížovka je plná? 
+                    counterTest++;
+                    csClone = (string[])stack.Pop();
+                    PrintCs(csClone);
+                    if (DeadEnd(cs, 0, 0))
+                    {
+                        break;
+                    }
+
+                    (int, int, bool) coordinates = FindWordStart(csClone, word);
+                    x = coordinates.Item1;
+                    y = coordinates.Item2;
+                    horizontalDirection = coordinates.Item3;
+                    if (x == -1)
+                    {
+                        if (IsFinished(csClone))
+                        {
+                            cs = csClone;
+                            return;
+                        }
+                        stack.Push(csClone);
+                        continue;
+                        // if x == -2.... křížovka je plná? 
+                    }
+                    WriteWord(csClone, word, x, y, horizontalDirection);
+                    PrintCs(csClone);
+                    stack.Push(csClone);
                 }
-                WriteWord(csClone, word, x, y, horizontalDirection);
-                PrintCs(csClone);
-                //stack.Push(csClone);
             }
+            FindDeadEnds(csClone);
+            /*projít si všechna neobsažená místa a zkusit je dát do DeadEnd*/
         }
+
+        bool IsFinished(string[] cs)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    if (cs[x * width + y] == emptyField)
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
         string[] WriteWord(string[] cs, Word word, int x, int y, bool horizontalDirection)
         {
             string[] wordLetters = word.word.Select(c => c.ToString()).ToArray();
@@ -140,10 +174,289 @@ namespace BAK
 
             return (-1, -1, false);
         }
+        bool DeadEnd(string[] cs, int x, int y)
+        {
+            return DeadEndBorder(cs, x, y) && DeadEndInner(cs, x, y);
+        }
+
+
+
+        bool DeadEndBorder(string[] cs, int x, int y)
+        {
+            string[] containedLetters;
+            string[] currentContainedLetters;
+            for (int j = Math.Max(1, y); j < height; j++)
+            {
+                if (impossiblePathsList[0][j].Count == 0) continue;
+                currentContainedLetters = ContainedLetters(cs, 0, j, true);
+                if (currentContainedLetters.Length == 0) continue;
+                if (currentContainedLetters[0] == "_") break;
+                currentContainedLetters = GetMinimalImposibilePath(currentContainedLetters);
+                for (int i = impossiblePathsList[0][j].Count - 1; i >= 0; i--)
+                {
+                    containedLetters = impossiblePathsList[0][j][i].containedLetters;
+                    if (containedLetters.SequenceEqual(currentContainedLetters))
+                    {
+                        return true;
+                    }
+                }
+
+            }
+            for (int i = Math.Max(1, x); i < width; i++)
+            {
+                if (impossiblePathsList[i][0].Count == 0) continue;
+                currentContainedLetters = ContainedLetters(cs, i, 0, false);
+                if (currentContainedLetters.Length == 0) continue;
+                if (currentContainedLetters[0] == "_") break;
+                currentContainedLetters = GetMinimalImposibilePath(currentContainedLetters);
+                for (int j = impossiblePathsList[i][0].Count - 1; j >= 0; j--)
+                {
+                    containedLetters = impossiblePathsList[i][0][j].containedLetters;
+                    if (containedLetters.SequenceEqual(currentContainedLetters))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        string[] GetMinimalImposibilePath(string[] containedLetters)
+        {
+            int i = 0;
+            string letters = "";
+            while (i < containedLetters.Length && containedLetters[i] != "_")
+            {
+                letters += containedLetters[i];
+                i++;
+            }
+            while (letters.Length > 1 && dictionary.ImpossibleToSelect(letters.Substring(0, letters.Length - 1)))
+            {
+                if (letters.Length < 2)
+                {
+                    break;
+                }
+                letters = letters.Substring(0, letters.Length - 1);
+            }
+            return letters.Select(c => c.ToString()).ToArray();
+        }
+
+        bool DeadEndInner(string[] cs, int x, int y)
+        {
+            string[] containedLetters;
+            string[] currentContainedLettersHor;
+            string[] currentContainedLettersVer;
+            bool horizontalDirection;
+
+            for (int j = 1; j < height; j++)
+            {
+                for (int i = 1; i < width; i++)
+                {
+                    if (impossiblePathsList[i][j].Count == 0) continue;
+                    if (x > i && y > j) continue;
+                    currentContainedLettersHor = ContainedLetters(cs, i, j, true);
+
+                    currentContainedLettersVer = ContainedLetters(cs, i, j, false);
+                    foreach ((string[] containedLetters, bool horizontalDirection) t in impossiblePathsList[i][j])
+                    {
+                        containedLetters = t.Item1;
+                        horizontalDirection = t.Item2;
+                        if (horizontalDirection && Match(currentContainedLettersHor, containedLetters))
+                        {
+                            Console.WriteLine(string.Join("", currentContainedLettersHor) + " " + string.Join("", containedLetters));
+                            return true;
+                        }
+
+                        else if (!horizontalDirection && Match(currentContainedLettersVer, containedLetters))
+                        {
+                            Console.WriteLine(string.Join("", currentContainedLettersVer) + " " + string.Join("", containedLetters));
+                            return true;
+                        }
+
+                    }
+                }
+            }
+            return false;
+        }
+
+        public List<string> FindShortestImpossibleMatches(string[] containedLetters)
+        {
+            string pattern = string.Join("", containedLetters);
+            if (Match(pattern))
+            {
+                return new List<string>();
+            }
+            List<string> shortestMatches = new List<string>();
+            shortestMatches.Add(string.Join("", containedLetters));//todo
+
+            for (int len = pattern.Length - 1; len > 0; len--)
+            {
+                StringBuilder sb = new StringBuilder(pattern);
+                for (int i = len; i < pattern.Length; i++)
+                {
+                    sb[i] = '_';
+                    string newPattern = sb.ToString();
+
+                    if (!Match(newPattern))
+                    {
+                        Console.WriteLine("Patter: " + newPattern);
+                        shortestMatches.Add(newPattern);
+                    }
+                    else
+                    {
+                        System.Console.WriteLine("Počet podpaternů: " + shortestMatches.Count);
+                        foreach (string pat in shortestMatches)
+                        {
+                            System.Console.WriteLine(pat);
+                        }
+                        return shortestMatches;
+                    }
+                }
+            }
+            return shortestMatches;  // Nenalezli jsme žádný odpovídající vzor
+        }
+        public bool Match(string containedLetters)
+        {
+            string regexPattern = containedLetters.Replace("_", ".");
+
+            // Přidání hranic slov pro přesné vyhledání slova
+            regexPattern = @"\b" + regexPattern + @"\b";
+
+            return dictionary.wordsList.AsParallel().Any(w => Regex.IsMatch(w.word, regexPattern));
+        }
+
+        public bool Match(string[] currentContainedLetters, string[] containedLetters)
+        {
+            string ccl = string.Join("", currentContainedLetters);
+            string cl = string.Join("", containedLetters);
+
+            ccl = ccl.Replace("_", ".");
+            cl = cl.Replace("_", ".");
+            return Regex.IsMatch(ccl, cl);
+        }
+
+        void FindDeadEnds(string[] cs)
+        {
+            bool horizontalDirection;
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    if (!cs[x * width + y].Contains(clueSymbol)) continue;
+                    if (cs[x * width + y].Contains("/" + clueSymbol))
+                    {
+                        if (!DeadEndAlreadyFound(cs, x, y, false)) //kontrola, že to ještě není uložené na impossiblePathsList
+                        {
+                            pocetNesplnitelnychCest++;
+                            horizontalDirection = false;
+                            string[] containedLetters = ContainedLetters(cs, x, y, horizontalDirection);
+                            containedLetters = GetMinimalImposibilePath(containedLetters);
+                            impossiblePathsList[x][y].Add((containedLetters, horizontalDirection));
+                        }
+                    }
+                    if (cs[x * width + y] == clueSymbol || cs[x * width + y] == clueSymbol + "/" + clueSymbol)
+                    {
+                        if (!DeadEndAlreadyFound(cs, x, y, false)) //kontrola, že to ještě není uložené na impossiblePathsList
+                        {
+                            pocetNesplnitelnychCest++;
+                            horizontalDirection = true;
+                            string[] containedLetters = ContainedLetters(cs, x, y, horizontalDirection);
+                            containedLetters = GetMinimalImposibilePath(containedLetters);
+                            impossiblePathsList[x][y].Add((containedLetters, horizontalDirection));
+                        }
+                    }
+                }
+            }
+        }
+
+
+        bool DeadEndAlreadyFound(string[] cs, int x, int y, bool horizontalDirection)
+        {
+            string[] currentContainedLetters = ContainedLetters(cs, x, y, horizontalDirection);
+            currentContainedLetters = GetMinimalImposibilePath(currentContainedLetters);
+
+            foreach ((string[] containedLetters, bool horizontalDirection) t in impossiblePathsList[x][y])
+            {
+                if (t.Item2 != horizontalDirection)
+                {
+                    continue;
+                }
+                string[] containedLetters = t.Item1;
+                if (containedLetters.SequenceEqual(currentContainedLetters))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public string[] ContainedLetters(string[] cs, int x, int y, bool horintalDirection)
+        {
+            string[] pismena;
+            //StringBuilder pismena = new StringBuilder();
+            int i = 0;
+            Regex regex = new Regex(@"[\p{Lu}\p{L}ÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]");
+            if (horintalDirection)
+            {
+                x++;
+                pismena = new string[GetMaxWordLength(cs, x, y, horintalDirection)];
+                while (x + i < width && !IsClue(cs[(x + i) * width + y]))
+                {
+                    if (regex.IsMatch(cs[(x + i) * width + y]) && cs[(x + i) * width + y].Length <= 1)
+                    {
+                        //pismena.Append(cs[x + i, y]);
+                        pismena[i] = cs[(x + i) * width + y];
+                    }
+                    else if (cs[(x + i) * width + y] == " ")
+                    {
+                        pismena[i] = "_";
+                    }
+                    i += 1;
+                }
+            }
+            else
+            {
+                y++;
+                pismena = new string[GetMaxWordLength(cs, x, y, horintalDirection)];
+                while (y + i < height && !IsClue(cs[x * width + y + i]))
+                {
+                    if (regex.IsMatch(cs[x * width + y + i]) && cs[x * width + y + i].Length <= 1)
+                    {
+                        pismena[i] = cs[x * width + y + i];
+                    }
+                    else if (cs[x * width + y + i] == " ")
+                    {
+                        pismena[i] = "_";
+                    }
+                    i += 1;
+                }
+            }
+            return pismena;
+        }
+        public int GetMaxWordLength(string[] cs, int x, int y, bool horizontalDirection)
+        {
+            int i = 0;
+            if (horizontalDirection)
+            {
+                while (x + i < width && !IsClue(cs[(x + i) * width + y]))
+                {
+                    i++;
+                }
+
+            }
+            else
+            {
+                while (y + i < height && !IsClue(cs[x * width + y + i]))
+                {
+                    i++;
+                }
+            }
+            Console.WriteLine(i);
+            return i;
+        }
 
         bool CanPlace(string[] cs, Word word, int x, int y, bool horizontalDirection)
         {
-            //hlídat, že slovo není kratší než má být
             int i = 0;
             string[] wordLetters = word.word.Select(c => c.ToString()).ToArray();
             if (horizontalDirection)
@@ -225,17 +538,30 @@ namespace BAK
             return field.Contains(clueSymbol) || field.Contains(clue);
         }
 
-        bool CrosswordContraintsAreRight()
+        bool CrosswordContraintsComplied()
         {
-            for (int y = 0; y < height; y++)
+            for (int y = 1; y < height; y++)
             {
-                for (int x = 0; x < width; x++)
+                for (int x = 1; x < width; x++)
                 {
-                    
+                    if (!cs[x * width + y].Contains(clueSymbol)) continue;
+                    if (x + 2 < width && cs[(x + 2) * width + y].Contains(clueSymbol)) //existuje místo pro slovo délky 1
+                    {
+                        return false;
+                    }
+                    if (y + 2 < height && cs[x * width + y + 2].Contains(clueSymbol)) //existuje místo pro slovo délky 1
+                    {
+                        return false;
+                    }
+                    if ((x + 1 < width && cs[(x + 1) * width + y].Contains(clueSymbol)) &&
+                        (y + 1 < height && cs[x * width + y + 1].Contains(clueSymbol)))
+                    {
+                        return false;
+                    }
                 }
             }
             //nesmí existovat slova délky 1 a legendy, ze kterých nemůže vést žádné slovo
-            return false;
+            return true;
         }
 
         public void InitCrosswordContraints()

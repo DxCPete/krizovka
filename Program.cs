@@ -14,13 +14,7 @@ namespace BAK
 
         static void Main(string[] args)
         {
-            new CrosswordSw(10,10);
-
-
-
-            //pořád se stává, že je místo o délce 1
-
-
+            new CrosswordSw(8, 8);
 
         }
     }

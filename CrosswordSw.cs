@@ -35,7 +35,8 @@ namespace BAK
             do
             {
                 InitCrosswordContraints();
-            } while (!CrosswordContraintsComplied()); //hotova jen z casti
+                
+            } while (!CrosswordContraintsComplied()); 
             longestWordLength = LongestPossibleWord();
             dictionary = new Dictionary(LongestPossibleWord());
             FillWithWords();
@@ -44,7 +45,8 @@ namespace BAK
 
 
         int counterTest = 0;
-        public void FillWithWords()
+        int ukoncenoNaDeadEnd = 0;
+        void FillWithWords()
         {
             stack.Push((cs, new List<Word>()));
             int x;
@@ -55,24 +57,26 @@ namespace BAK
             {
                 (string[], List<Word>) st = stack.Pop();
                 string[] currentCs = (string[])st.Item1.Clone();
+                PrintCs(currentCs);
                 List<Word> usedWords = st.Item2;
-                (int, int, bool) coordinates = NextCoordinates(currentCs);
+                (int, int, bool) coordinates = NextCoordinates(currentCs, usedWords.Count);
                 x = coordinates.Item1;
                 if (x == -1)
                 {
-                    if (IsFinished(currentCs))
+                    /*if (IsFinished(currentCs))
                     {
                         PrintCs(currentCs);
                         cs = currentCs;
                         return;
-                    }
-                    continue;
+                    }*/
+                    return;
                 }
                 y = coordinates.Item2;
                 horizontalDirection = coordinates.Item3;
-                if (DeadEnd(cs, x, y))
+                if (DeadEnd(currentCs, x, y))
                 {
-                    break;
+                    ukoncenoNaDeadEnd++;
+                    continue;
                 }
                 string[] containedLetters = ContainedLetters(currentCs, x, y, horizontalDirection);
                 List<Word> possibleWords = dictionary.SelectWordsNew(usedWords, containedLetters);
@@ -88,7 +92,7 @@ namespace BAK
                 }
                 if (possibleWords.Count == 0)
                 {
-                    if (!DeadEndAlreadyFound(currentCs, x, y, horizontalDirection)) //kontrola, že to ještě není uložené na impossiblePathsList
+                    if (!DeadEndAlreadyFound(currentCs, x, y, horizontalDirection)) 
                     {
                         pocetNesplnitelnychCest++;
                         containedLetters = GetMinimalImposibilePath(containedLetters);
@@ -102,46 +106,62 @@ namespace BAK
              to už asi není potřeba (NonexistantWord)*/
         }
 
-        (int, int, bool) NextCoordinates(string[] cs)
+        (int, int, bool) NextCoordinates(string[] cs, int number) //most contrained 
         {
-            int random = new Random().Next();
-            if (random % 2 == 0)
-            {
-                for (int y = 0; y < height; y++)
-                {
-                    for (int x = 0; x < width; x++)
-                    {
-                        if (cs[x * width + y].Contains("/" + clueSymbol))
-                        {
-                            return (x, y, false);
-                        }
-                        if (cs[x * width + y].Contains(clueSymbol))
-                        {
-                            return (x, y, true);
-                        }
-                    }
-                }
-            }
-            else
+            int bestX = -1;
+            int bestY = -1;
+            bool horDir = false;
+            int mostConstrains = -1;
+            bool horizontalDirection;
+            int count;
+            for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    for (int y = 0; y < height; y++)
+                    if (!cs[x * width + y].Contains(clueSymbol)) continue;
+                    if (cs[x * width + y].Contains("/" + clueSymbol))
                     {
-                        if (cs[x * width + y].Contains("/" + clueSymbol))
+                        horizontalDirection = false;
+                        count = ConstraintsCount(cs, x, y, horizontalDirection);
+                        if (count > mostConstrains)
                         {
-                            return (x, y, false);
+                            bestX = x; bestY = y;
+                            horDir = horizontalDirection;
+                            mostConstrains = count;
                         }
-                        if (cs[x * width + y].Contains(clueSymbol))
+                    }
+                    if (cs[x * width + y] == clueSymbol || cs[x * width + y].Contains(clueSymbol + "/"))
+                    {
+                        horizontalDirection = true;
+                        count = ConstraintsCount(cs, x, y, horizontalDirection);
+                        if (count > mostConstrains)
                         {
-                            return (x, y, true);
+                            bestX = x; bestY = y;
+                            horDir = horizontalDirection;
+                            mostConstrains = count;
                         }
                     }
                 }
             }
-            return (-1, -1, false);
+            Console.WriteLine(mostConstrains);
+            return (bestX, bestY, horDir);
         }
 
+        int ConstraintsCount(string[] cs, int x, int y, bool horizontalDirection)
+        {
+            string[] containedLetters = ContainedLetters(cs, x, y, horizontalDirection);
+            int count = 0;
+            for (int i = 0; i < containedLetters.Length; i++)
+            {
+                if (Char.IsLetter(char.Parse(containedLetters[i])))
+                {
+                    count++;
+                }
+            }
+            return count;
+        }
+
+      
         bool IsFinished(string[] cs)
         {
             for (int y = 0; y < height; y++)
@@ -229,7 +249,7 @@ namespace BAK
         }
         bool DeadEnd(string[] cs, int x, int y)
         {
-            return /*ContainsNonexistantWord(cs) &&*/ DeadEndBorder(cs, x, y) && DeadEndInner(cs, x, y);
+            return /*ContainsNonexistantWord(cs) ||*/ DeadEndBorder(cs, x, y) || DeadEndInner(cs, x, y);
         }
 
         bool ContainsNonexistantWord(string[] cs)
@@ -587,7 +607,6 @@ namespace BAK
                         i--;
                         if (i > max)
                         {
-                            Console.WriteLine(x + " " + y + " " + false);
                             max = i;
 
                         }
@@ -602,7 +621,6 @@ namespace BAK
                         i--;
                         if (i > max)
                         {
-                            Console.WriteLine(x + " " + y + " " + true);
                             max = i;
 
                         }
@@ -619,16 +637,16 @@ namespace BAK
 
         bool CrosswordContraintsComplied()
         {
-            for (int y = 1; y < height; y++)
+            for (int y = 0; y < height; y++)
             {
-                for (int x = 1; x < width; x++)
+                for (int x = 0; x < width; x++)
                 {
                     if (!cs[x * width + y].Contains(clueSymbol)) continue;
-                    if (x + 2 < width && cs[(x + 2) * width + y].Contains(clueSymbol)) //existuje místo pro slovo délky 1
+                    if (y != 0 && x + 2 < width && cs[(x + 2) * width + y].Contains(clueSymbol)) //existuje místo pro slovo délky 1
                     {
                         return false;
                     }
-                    if (y + 2 < height && cs[x * width + y + 2].Contains(clueSymbol)) //existuje místo pro slovo délky 1
+                    if (x !=0 && y + 2 < height && cs[x * width + y + 2].Contains(clueSymbol)) //existuje místo pro slovo délky 1
                     {
                         return false;
                     }
@@ -652,7 +670,7 @@ namespace BAK
                     cs[x * width + y] = emptyField;
                 }
             }
-
+            cs[0] = "#"; //napověda
             WeightedRNG rng = InitRNG();
             Console.WriteLine("FirstLines");
             FirstLines(rng);
@@ -720,17 +738,17 @@ namespace BAK
 
         void PrintCs(string[] cs)
         {
-            /* StringBuilder sb = new StringBuilder();
-             for (int y = 0; y < height; y += 1)
-             {
-                 for (int x = 0; x < width; x += 1)
-                 {
-                     sb.Append(cs[x * width + y].Replace("7/7", "7").Replace("/7", "7") + " | ");
-                 }
+            StringBuilder sb = new StringBuilder();
+            for (int y = 0; y < height; y += 1)
+            {
+                for (int x = 0; x < width; x += 1)
+                {
+                    sb.Append(cs[x * width + y].Replace("7/7", "7").Replace("/7", "7") + " | ");
+                }
 
-                 sb.AppendLine();
-             }
-             Console.WriteLine(sb.ToString());*/
+                sb.AppendLine();
+            }
+            Console.WriteLine(sb.ToString());
         }
 
         public void PrintMainCs()

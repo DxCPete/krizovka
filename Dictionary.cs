@@ -93,7 +93,7 @@ namespace BAK
                 .ToList();
             return wordsFiltered;
         }
-        public List<Word> SelectWordsNew(List<Word> usedWords, string[] containedLetters) //ten hlavní
+        public List<Word> SelectWordsNew(List<Word> usedWords, string[] containedLetters) //ten hlavní pro novou Sw
         {
             Word w = new Word(string.Concat(containedLetters), "");
             List<Word> wordsFiltered = wordsList.AsParallel()

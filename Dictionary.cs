@@ -15,15 +15,15 @@ namespace BAK
         private WordComparer comparer { get; } = new WordComparer();
         static string currentDirectory = System.Environment.CurrentDirectory;
         private string conStr = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=\"" + currentDirectory.Substring(0, currentDirectory.LastIndexOf("bin")) + "Directory.mdf\";Integrated Security=True"; //bude potřeba změnit, když přesunu soubor
-        int limit = 50;
+        int limit = 5;
         Dictionary<char, int> indexes; //propably wont be used
 
-        private string longestWord { get; set; } = ""; 
+        private string longestWord { get; set; } = "";
 
 
         public Dictionary(int maxLength)
         {
-            SetDictionary(maxLength); 
+            SetDictionary(maxLength);
         }
 
         public string vymazCarky(string word)
@@ -36,6 +36,7 @@ namespace BAK
         public void SetDictionary(int maxLength)
         {
             SqlConnection con = new SqlConnection(conStr);
+            int[] delky = new int[20];
             con.Open();
             if (con.State == System.Data.ConnectionState.Open)
             {
@@ -52,8 +53,14 @@ namespace BAK
                     {
                         longestWord = w;
                     }
+                    delky[w.Length]++;
                     string c = reader["clue"].ToString();
-                    if (w.Length > maxLength || w.Contains(" ") || w.Contains("-") || w.Contains("/") || w.Contains("-") || w.Contains("&")) continue;
+                    if (w.Length > maxLength || w.Contains(" ") || w.Contains("-") || w.Contains("/") || w.Contains("-") || w.Contains("+") ||
+                        w.Contains("5") || w.Contains("&"))
+                    {
+                        // Console.WriteLine(w);
+                        continue;
+                    };//todo smazat tyto znaky z db
                     w = vymazCarky(w);
                     wordsList.Add(new Word(w, c));
                     n++;
@@ -61,6 +68,8 @@ namespace BAK
                 Console.WriteLine(n);
                 reader.Close();
                 con.Close();
+
+
             }
             else
             {
@@ -79,13 +88,13 @@ namespace BAK
             indexes = wordsList.Select((word, index) => new { Word = word, Index = index })
                 .GroupBy(item => item.Word.word[0])
                 .ToDictionary(group => group.Key, group => group.First().Index);
-            }
+        }
 
 
 
         public List<Word> SelectWords(List<Word> usedWords, string[] containedLetters) //ten hlavní
         {
-            Word w = new Word(string.Concat(containedLetters), "");          
+            Word w = new Word(string.Concat(containedLetters), "");
             List<Word> wordsFiltered = wordsList.AsParallel()
                 .Except(usedWords.AsParallel())
                 .Where(word => comparer.Equals(word, w))
@@ -99,7 +108,7 @@ namespace BAK
             List<Word> wordsFiltered = wordsList.AsParallel()
                 .Except(usedWords.AsParallel())
                 .Where(word => comparer.EqualsNew(word, w))
-                //.Take(limit)
+                .Take(limit)
                 .ToList();
             return wordsFiltered;
         }
@@ -258,7 +267,7 @@ namespace BAK
             }
         }
 
-       public Word TestGetWord(string clue)
+        public Word TestGetWord(string clue)
         {
             return (Word)wordsList.Where(w => w.clue.Equals(clue))
                 .First();

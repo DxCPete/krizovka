@@ -18,9 +18,11 @@ namespace BAK
         {
             Console.WriteLine("novy");
 
-           
 
-            new CrosswordSw(19,18);
+            for (int i = 0; i < 10; i++)
+            {
+                new CrosswordSw(30, 30);
+            }
         }
 
         static string GetShortestLettersCount(string[] containedLetters)
@@ -41,7 +43,7 @@ namespace BAK
                         count++;
                     }
                 }
-                if (count < min &&count > 0)
+                if (count < min && count > 0)
                 {
                     min = count;
                     minimalLetters = letters;
@@ -72,10 +74,10 @@ namespace BAK
             {
                 GenerateCombinations(containedLetters, list, index + 1);
 
-                string original = containedLetters[index]; 
+                string original = containedLetters[index];
                 containedLetters[index] = "_";
                 GenerateCombinations(containedLetters, list, index + 1);
-                containedLetters[index] = original; 
+                containedLetters[index] = original;
             }
         }
     }

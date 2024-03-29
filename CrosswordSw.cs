@@ -83,6 +83,7 @@ namespace BAK
                 if (x == -1)
                 {
                     PismenaSedi(currentCs, usedWords);
+                    AverageWordLength(usedWords);
                     cs = currentCs;
                     return;
                 }
@@ -94,9 +95,10 @@ namespace BAK
                     continue;
                 }
                 string[] containedLetters = ContainedLetters(currentCs, x, y, horizontalDirection);
-                if(containedLetters.Length > longestWordLength)//TEST ONLY
+                if (containedLetters.Length > longestWordLength)//TEST ONLY
                 {
-
+                    Console.WriteLine("MaxWordLength sucks");
+                    return;
                 }
                 List<Word> possibleWords = dictionary.SelectWordsNew(usedWords, containedLetters);
                 foreach (Word word in possibleWords)
@@ -116,7 +118,7 @@ namespace BAK
                         pocetNesplnitelnychCest++;
                         containedLetters = GetMinimalImposibilePath(containedLetters);
                         impossiblePathsList[x][y].Add((containedLetters, horizontalDirection));
-
+                        lastDeadEndedCoordinates = (x, y, horizontalDirection);
                     }
                 }
             }
@@ -582,7 +584,7 @@ namespace BAK
             return false;
         }
 
-        public string[] ContainedLetters(string[] cs, int x, int y, bool horintalDirection)
+        public string[] ContainedLetters(string[] cs, int x, int y, bool horintalDirection) //todo regex by šel vyměnit jenom za kontrolu, že políčko neobsahuje clue
         {
             string[] pismena;
             //StringBuilder pismena = new StringBuilder();
@@ -701,7 +703,7 @@ namespace BAK
                         {
                             max = i;
                         }
-                        Console.WriteLine(x + " " + y + " " + false + " " + i);
+                        //Console.WriteLine(x + " " + y + " " + false + " " + i);
                         if (i == 1)
                         {
                             Console.WriteLine(x + " " + y); return 999;
@@ -719,7 +721,7 @@ namespace BAK
                             max = i;
 
                         }
-                        Console.WriteLine(x + " " + y + " " + true + " " + i);
+                        //Console.WriteLine(x + " " + y + " " + true + " " + i);
                         if (i == 1)
                         {
                             Console.WriteLine(x + " " + y); return 999;
@@ -904,35 +906,43 @@ namespace BAK
 
         }
 
-        void InnerPart(WeightedRNG rng) //todo zasahuje do  2. řádku, což nesmí
+        void InnerPart(WeightedRNG rng)
         {
             for (int y = 3; y < height - 2; y++)
             {
-                for (int x = rng.GetRandomNumber(); x < width - 2; x++)
+                for (int x = Math.Max(rng.GetRandomNumber(), 3); x < width - 2; x++)
                 {
-                    if (x != width - 2 && y != height - 2 && cs[x * height + y] != clueSymbol && (y - 2 >= 0 && cs[x * height + y - 2] != clueSymbol) &&
-                        (x + 2 < width && cs[(x + 2) * height + y] != clueSymbol) && (x - 2 >= 0 && cs[(x - 2) * height + y] != clueSymbol))
+                    if (cs[x * height + y] != clueSymbol && cs[x * height + y - 2] != clueSymbol && cs[x * height + y + 2] != clueSymbol &&
+                       cs[(x + 2) * height + y] != clueSymbol && cs[(x - 2) * height + y] != clueSymbol)
                     {
                         cs[x * height + y] = clueSymbol;
                         x += rng.GetRandomNumber();
                     }
                 }
             }
-
+            PrintMainCs();
             for (int x = 3; x < width - 2; x++)
             {
-                int number = rng.GetRandomNumber();
-                for (int i = 0; i < height; i++)
+                for (int y = Math.Max(rng.GetRandomNumber(), 3); y < height - 2; y++)
                 {
-                    int y = rng.GetRandomNumber();
+                    if (cs[x * height + y] != clueSymbol && cs[x * height + y - 2] != clueSymbol && cs[x * height + y + 2] != clueSymbol &&
+                       cs[(x + 2) * height + y] != clueSymbol && cs[(x - 2) * height + y] != clueSymbol)
+                    {
+                        cs[x * height + y] = clueSymbol;
+                        y += rng.GetRandomNumber();
+                    }
+                }
+                /*for (int i = 0; i < height; i++)
+                {
+                    int y = Math.Max(rng.GetRandomNumber(), 3);
                     if (y < height && cs[x * height + y] != clueSymbol && cs[(x - 1) * height + y] != clueSymbol && cs[(x - 2) * height + y] != clueSymbol &&
-                       (x + 1 < width && cs[(x + 1) * height + y] != clueSymbol) && (x + 2 < width && cs[(x + 2) * height + y] != clueSymbol)
+                       cs[(x + 1) * height + y] != clueSymbol &&  cs[(x + 2) * height + y] != clueSymbol
                         && cs[x * height + y - 1] != clueSymbol && cs[x * height + y - 2] != clueSymbol && (y + 1 < height && cs[x * height + y + 1] != clueSymbol)
                         && (y + 2 < height && cs[x * height + y + 2] != clueSymbol))
                     {
                         cs[x * height + y] = clueSymbol;
                     }
-                }
+                }*/
 
 
                 bool hasClue = false;
@@ -988,7 +998,7 @@ namespace BAK
             }
         }
 
-        public WeightedRNG InitRNG()
+        public WeightedRNG InitRNG()//todo vylepšit tohle, hlavně ten "max"
         {
             List<WeightedNumber> list = new List<WeightedNumber>();
             //list.Add(new WeightedNumber(2, 30));
@@ -1083,6 +1093,17 @@ namespace BAK
             }
             return false;
         }
+        double AverageWordLength(List<Word> usedWords)
+        {
+            double count = 0.0;
+            foreach(Word w in usedWords)
+            {
+                count += w.word.Length;
+            }
 
+            double average = count / usedWords.Count;
+            Console.WriteLine("Average: " + average);
+            return average;
+        }
     }
 }

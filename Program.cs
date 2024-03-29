@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -15,32 +16,67 @@ namespace BAK
 
         static void Main(string[] args)
         {
-            string[] a = { "A", "_", "_", "_", "_", "_", "_" };
-            GetMinimalImposibilePath(a);
-           // new CrosswordSw(15,15);
+            Console.WriteLine("novy");
 
+           
+
+            new CrosswordSw(19,18);
         }
 
-       static string[] GetMinimalImposibilePath(string[] containedLetters)
+        static string GetShortestLettersCount(string[] containedLetters)
         {
-            Dictionary dictionary = new Dictionary(11);
-            int i = 0;
-            string letters = "";
-            while (i < containedLetters.Length && containedLetters[i] != "_")
+            List<string[]> list = new List<string[]>();
+            GenerateCombinations(containedLetters, list, 0);
+            int min = 999;
+            string[] minimalLetters = containedLetters;
+            int n = containedLetters.Length;
+            foreach (string[] letters in list)
             {
-                letters += containedLetters[i];
-                i++;
-            }
-            while (letters.Length > 1 && dictionary.ImpossibleToSelect(letters.Substring(0, letters.Length - 1)))
-            {
-                if (letters.Length < 2)
+                int count = 0;
+                Console.WriteLine(string.Join("", letters));
+                for (int i = 0; i < n; i++)
                 {
-                    break;
+                    if (Char.IsLetter(char.Parse(letters[i])))
+                    {
+                        count++;
+                    }
                 }
-                letters = letters.Substring(0, letters.Length - 1);
+                if (count < min &&count > 0)
+                {
+                    min = count;
+                    minimalLetters = letters;
+                }
             }
-            Console.WriteLine(letters);
-            return letters.Select(c => c.ToString()).ToArray();
+            Console.WriteLine(string.Join("", minimalLetters));
+            return "";
+        }
+
+        static void GenerateCombinations(string[] containedLetters, List<string[]> list, int index)
+        {
+            Dictionary dictionary = new Dictionary(100);
+            if (!dictionary.ImpossibleToSelect(string.Join("", containedLetters)))
+            {
+                return;
+            }
+            if (index == containedLetters.Length)
+            {
+                list.Add((string[])containedLetters.Clone());
+                return;
+            }
+
+            if (containedLetters[index] == "_")
+            {
+                GenerateCombinations(containedLetters, list, index + 1);
+            }
+            else
+            {
+                GenerateCombinations(containedLetters, list, index + 1);
+
+                string original = containedLetters[index]; 
+                containedLetters[index] = "_";
+                GenerateCombinations(containedLetters, list, index + 1);
+                containedLetters[index] = original; 
+            }
         }
     }
 }

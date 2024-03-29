@@ -63,8 +63,7 @@ namespace BAK
             if (n != n2) return false;
 
             int i = 0;
-            //Console.WriteLine(candidate.word);
-            while (i < n && char.IsLetter(candidate.word[i]))
+            while (i < n)
             {
                 // Console.WriteLine(candidate.word[i].ToString() + " " + wordContains[i]);
                 if (candidate.word[i].ToString() != wordContains[i] && (wordContains[i] != "_" || wordContains[i] == " "))

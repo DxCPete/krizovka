@@ -15,7 +15,7 @@ namespace BAK
         private WordComparer comparer { get; } = new WordComparer();
         static string currentDirectory = System.Environment.CurrentDirectory;
         private string conStr = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=\"" + currentDirectory.Substring(0, currentDirectory.LastIndexOf("bin")) + "Directory.mdf\";Integrated Security=True"; //bude potřeba změnit, když přesunu soubor
-        int limit = 5;
+        int limit = 150;
         Dictionary<char, int> indexes; //propably wont be used
 
         private string longestWord { get; set; } = "";
@@ -81,7 +81,7 @@ namespace BAK
             //wordsList = wordsList náhodně zamíchat
             wordsList = wordsList.GroupBy(w => w.word)
                 .Select(s => s.First())
-                .OrderByDescending(w => w.word.Length)
+                .OrderBy(x => rnd.Next())
                 .ToList();
 
 
@@ -92,7 +92,7 @@ namespace BAK
 
 
 
-        public List<Word> SelectWords(List<Word> usedWords, string[] containedLetters) //ten hlavní
+        public List<Word> SelectWords(List<Word> usedWords, string[] containedLetters) //ten hlavní CHYB V EQUALS
         {
             Word w = new Word(string.Concat(containedLetters), "");
             List<Word> wordsFiltered = wordsList.AsParallel()
@@ -179,18 +179,18 @@ namespace BAK
             }
         }
 
-        public bool ImpossibleToSelect(string containedLetters)
+        public bool ImpossibleToSelect(string containedLetters)//update kvůli CrosswordSw
         {
             Word w = new Word(containedLetters, "");
             Random rnd = new Random();
-            List<Word> wordsFiltered = wordsList.Where(word => comparer.StartsWith(word, w))
+            List<Word> wordsFiltered = wordsList.Where(word => comparer.EqualsNew(word, w))
                 .Take(1)
                 .ToList();
             return (wordsFiltered.Count == 0);
         }
 
 
-        public bool ImpossibleToSelect(string[] wordContains) //update kvůli CrosswordSw
+      /*  public bool ImpossibleToSelect(string[] wordContains) 
         {
             Word w = new Word(string.Concat(wordContains), "");
             Random rnd = new Random();
@@ -198,7 +198,7 @@ namespace BAK
                 .Take(1)
                 .ToList();
             return (wordsFiltered.Count == 0);
-        }
+        }*/
 
         public bool ImpossibleToSelectEquals(string[] wordContains)
         {

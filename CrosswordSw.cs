@@ -709,7 +709,7 @@ namespace BAK
                             Console.WriteLine(x + " " + y); return 999;
                         }
                     }
-                    else if (cs[x * height + y] == clueSymbol || cs[x * height + y].Contains(clueSymbol + "/"))
+                    if (cs[x * height + y] == clueSymbol || cs[x * height + y].Contains(clueSymbol + "/"))
                     {
                         int i = 1;
                         while (x + i < width && !cs[(x + i) * height + y].Contains(clueSymbol))

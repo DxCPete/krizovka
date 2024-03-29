@@ -18,11 +18,12 @@ namespace BAK
         {
             Console.WriteLine("novy");
 
+            new CrosswordSw(25,30);
 
-            for (int i = 0; i < 10; i++)
+            /*for (int i = 0; i < 10; i++)
             {
                 new CrosswordSw(30, 30);
-            }
+            }*/
         }
 
         static string GetShortestLettersCount(string[] containedLetters)

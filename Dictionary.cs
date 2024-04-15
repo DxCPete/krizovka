@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 
 namespace BAK
 {
@@ -10,13 +11,13 @@ namespace BAK
     {
 
         public List<Word> wordsList { get; set; } = new List<Word>();
+        public List<string> secretsList { get; set; } = new List<string>();
         public bool languageCzech { get; set; } = true;
         public int difficulty { get; set; } = 1;
         private WordComparer comparer { get; } = new WordComparer();
         static string currentDirectory = System.Environment.CurrentDirectory;
         private string conStr = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=\"" + currentDirectory.Substring(0, currentDirectory.LastIndexOf("bin")) + "Directory.mdf\";Integrated Security=True"; //bude potřeba změnit, když přesunu soubor
         int limit = 150;
-        Dictionary<char, int> indexes; //propably wont be used
 
         private string longestWord { get; set; } = "";
 
@@ -24,6 +25,7 @@ namespace BAK
         public Dictionary(int maxLength)
         {
             SetDictionary(maxLength);
+            SetSecrets();
         }
 
         public string vymazCarky(string word)
@@ -32,11 +34,62 @@ namespace BAK
                 .Replace("Ó", "O").Replace("Ú", "U").Replace("Ů", "U").Replace("Ý", "Y");
         }
 
+        public void SetSecrets()
+        {
+            Random random = new Random();
+            SqlConnection con = new SqlConnection(conStr);
+            con.Open();
+            if (con.State == System.Data.ConnectionState.Open)
+            {
+                int language = languageCzech ? 1 : 0;
+                //todo přidat jazyk a obtížnost
+                string query = "SELECT * FROM dbo.Secrets;"; // ORDER BY NEWID()";
+
+                SqlCommand command = new SqlCommand(query, con);
+                SqlDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    string secr = reader["secret"].ToString();
+                    secr = secr.Replace("'", "");
+                    secretsList.Add(secr);
+                    /*if (secr.Length >= maxLength * 1.5 && secr.Length < maxLength * 2.5)
+                    {
+                        return (secr);
+                    }*/
+                }
+            }
+        }
+
+        public void VepsatTajenky()
+        {
+            int n = 0;
+            SqlConnection con = new SqlConnection(conStr);
+            con.Open();
+            if (con.State == System.Data.ConnectionState.Open)
+            {
+                string filePath = @"C:\Users\Pete\OneDrive\Desktop\todo\tajenkaENG.txt";
+                using (StreamReader reader = new StreamReader(filePath))
+                {
+                    string tajenka;
+                    while ((tajenka = reader.ReadLine()) != null)
+                    {
+                        tajenka = vymazCarky(tajenka.ToUpper());
+                        Console.WriteLine(tajenka);
+                        string query = "INSERT INTO dbo.Secrets (secret, czechLanguage, difficulty) VALUES ('" + tajenka + "',  'false', 1);";
+                        SqlCommand command = new SqlCommand(query, con);
+                        command.ExecuteNonQuery();
+                    }
+                    reader.Close();
+                }
+            }
+            con.Close();
+            Console.WriteLine(n);
+        }
+
 
         public void SetDictionary(int maxLength)
         {
             SqlConnection con = new SqlConnection(conStr);
-            int[] delky = new int[20];
             con.Open();
             if (con.State == System.Data.ConnectionState.Open)
             {
@@ -53,7 +106,6 @@ namespace BAK
                     {
                         longestWord = w;
                     }
-                    delky[w.Length]++;
                     string c = reader["clue"].ToString();
                     if (w.Length > maxLength || w.Contains(" ") || w.Contains("-") || w.Contains("/") || w.Contains("-") || w.Contains("+") ||
                         w.Contains("5") || w.Contains("&"))
@@ -68,8 +120,6 @@ namespace BAK
                 Console.WriteLine(n);
                 reader.Close();
                 con.Close();
-
-
             }
             else
             {
@@ -83,11 +133,6 @@ namespace BAK
                 .Select(s => s.First())
                 .OrderBy(x => rnd.Next())
                 .ToList();
-
-
-            indexes = wordsList.Select((word, index) => new { Word = word, Index = index })
-                .GroupBy(item => item.Word.word[0])
-                .ToDictionary(group => group.Key, group => group.First().Index);
         }
 
 
@@ -190,15 +235,15 @@ namespace BAK
         }
 
 
-      /*  public bool ImpossibleToSelect(string[] wordContains) 
-        {
-            Word w = new Word(string.Concat(wordContains), "");
-            Random rnd = new Random();
-            List<Word> wordsFiltered = wordsList.Where(word => comparer.Contains(word, wordContains))
-                .Take(1)
-                .ToList();
-            return (wordsFiltered.Count == 0);
-        }*/
+        /*  public bool ImpossibleToSelect(string[] wordContains) 
+          {
+              Word w = new Word(string.Concat(wordContains), "");
+              Random rnd = new Random();
+              List<Word> wordsFiltered = wordsList.Where(word => comparer.Contains(word, wordContains))
+                  .Take(1)
+                  .ToList();
+              return (wordsFiltered.Count == 0);
+          }*/
 
         public bool ImpossibleToSelectEquals(string[] wordContains)
         {
@@ -211,7 +256,7 @@ namespace BAK
         }
 
         public void InsertDataToDB()
-        { //C:\\Users\\petro\\OneDrive\\Desktop\\BAK - C#\\Directory.mdf
+        {
             SqlConnection con = new SqlConnection(conStr);
 
             con.Open();

@@ -52,7 +52,7 @@ namespace BAK
             Print();
             stopwatch.Stop();
 
-            Console.WriteLine("Program běžel " + stopwatch.Elapsed);
+           Console.WriteLine("Program běžel " + stopwatch.Elapsed);
         }
 
 

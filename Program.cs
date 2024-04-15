@@ -16,70 +16,29 @@ namespace BAK
 
         static void Main(string[] args)
         {
-            Console.WriteLine("novy");
+      
 
-            new CrosswordSw(25,30);
-
-            /*for (int i = 0; i < 10; i++)
+            new CrosswordSw(15,16);
+            /*CrosswordSw cs;
+            int celkovyPocetDeadEnd = 0;
+            int celkovyPocetImpossiblePaths = 0;
+            int celkovyPocetSlov = 0;
+            int celkovyPocetPouzitychSlov = 0;
+            int n = 1;
+            for (int i = 0; i < n; i++)
             {
-                new CrosswordSw(30, 30);
-            }*/
-        }
-
-        static string GetShortestLettersCount(string[] containedLetters)
-        {
-            List<string[]> list = new List<string[]>();
-            GenerateCombinations(containedLetters, list, 0);
-            int min = 999;
-            string[] minimalLetters = containedLetters;
-            int n = containedLetters.Length;
-            foreach (string[] letters in list)
-            {
-                int count = 0;
-                Console.WriteLine(string.Join("", letters));
-                for (int i = 0; i < n; i++)
-                {
-                    if (Char.IsLetter(char.Parse(letters[i])))
-                    {
-                        count++;
-                    }
-                }
-                if (count < min && count > 0)
-                {
-                    min = count;
-                    minimalLetters = letters;
-                }
-            }
-            Console.WriteLine(string.Join("", minimalLetters));
-            return "";
-        }
-
-        static void GenerateCombinations(string[] containedLetters, List<string[]> list, int index)
-        {
-            Dictionary dictionary = new Dictionary(100);
-            if (!dictionary.ImpossibleToSelect(string.Join("", containedLetters)))
-            {
-                return;
-            }
-            if (index == containedLetters.Length)
-            {
-                list.Add((string[])containedLetters.Clone());
-                return;
+                cs = new CrosswordSw(25,25);
+                celkovyPocetDeadEnd += cs.ukoncenoNaDeadEnd;
+                celkovyPocetImpossiblePaths += cs.pocetNesplnitelnychCest;
+                celkovyPocetSlov += cs.pocetPouzitychSlov;
+                celkovyPocetPouzitychSlov += cs.usedWords.Count;
             }
 
-            if (containedLetters[index] == "_")
-            {
-                GenerateCombinations(containedLetters, list, index + 1);
-            }
-            else
-            {
-                GenerateCombinations(containedLetters, list, index + 1);
-
-                string original = containedLetters[index];
-                containedLetters[index] = "_";
-                GenerateCombinations(containedLetters, list, index + 1);
-                containedLetters[index] = original;
-            }
+            Console.WriteLine("DeadEnd: " + celkovyPocetDeadEnd/n);
+            Console.WriteLine("ImpossiblePaths: " + celkovyPocetImpossiblePaths / n);
+            Console.WriteLine("PocetSlov: " + celkovyPocetSlov / n);
+            Console.WriteLine("PocetUzitychSlov: " + celkovyPocetPouzitychSlov / n);
+            */
         }
     }
 }

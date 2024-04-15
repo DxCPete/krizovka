@@ -18,7 +18,7 @@ namespace BAK
         {
       
 
-            new CrosswordSw(15,16);
+            new CrosswordSw(20,20);
             /*CrosswordSw cs;
             int celkovyPocetDeadEnd = 0;
             int celkovyPocetImpossiblePaths = 0;

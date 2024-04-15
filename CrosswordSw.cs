@@ -114,7 +114,6 @@ namespace BAK
                     }
                 }
             }
-            Console.WriteLine("Fuck");
         }
 
         (int, int, bool) NextCoordinates(string[] cs, int number) //most contrained 
@@ -701,7 +700,7 @@ namespace BAK
                         if (y + 1 < height && cs[x * height + y + 1].Contains(placeholderSecretSymbol))
                         {
                             coords.Add((x, y, false));
-                            while (cs[x * height + y + n + 1] == placeholderSecretSymbol)
+                            while (y + n + 1 < height && cs[x * height + y + n + 1] == placeholderSecretSymbol)
                             {
                                 Console.WriteLine(cs[x * height + y + n]);
                                 n++;
@@ -709,8 +708,8 @@ namespace BAK
                         }
                         else
                         {
-                            coords.Add((x, y, false));
-                            while (cs[(x + n + 1) * height + y] == placeholderSecretSymbol)
+                            coords.Add((x, y, true));
+                            while (x + n + 1 < width && cs[(x + n + 1) * height + y] == placeholderSecretSymbol)
                             {
                                 Console.WriteLine(cs[(x + n) * height + y]);
                                 n++;
@@ -721,7 +720,8 @@ namespace BAK
             }
             PrintCs(cs);
             TestPrint(cs);
-            if (n != secrets[0].Length / 2)
+            int secondPartLength = secrets[0].Substring(secrets[0].Length / 2).Length;
+            if (n != secondPartLength)
             {
                 var temp = coords[0];
                 coords[0] = coords[1];
@@ -823,38 +823,37 @@ namespace BAK
             if (directionHorizontal)
             {
                 y = random.Next(3, 6);
-
                 Word word = new Word(CreateSecretPlaceholder(length), "taj1");
                 if (word.word.Length == width - 3)
                 {
                     x = Math.Max(width, height) - length - 1;
                 }
-                if (y == 2)
+                if (x == 2)
                 {
                     cs[(x - 1) * height + y] = clueSymbol;
                 }
-                cs[x * height + y] = clueSymbol;
-                if (x != 0) cs[x * height + y] = word.clue + "/" + clueSymbol;
+                cs[x * height + y] = word.clue;
+                if (x != 0) cs[x * height + y] += "/" + clueSymbol;
                 WriteWord(cs, word, x, y, directionHorizontal);
                 if (x + word.word.Length + 1 < width)
                 {
                     cs[(x + word.word.Length + 1) * height + y] = clueSymbol;
                 }
                 //druhá část
-                length = secret.Substring(secret.Length / 2).Length;
+                length = secret.Substring(secret.Length / 2).Length - 1;
                 x = random.Next(0, width - length - 1);
                 if (x + word.word.Length == width - 3)
                 {
                     x = Math.Max(width, height) - length - 1;
                 }
-                if (y == 2)
+                if (x == 2)
                 {
                     cs[(x - 1) * height + y] = clueSymbol;
                 }
                 y = random.Next(7, width - 3);
                 word = new Word(CreateSecretPlaceholder(length), "taj2");
-                cs[x * height + y] = clueSymbol;
-                if (x != 0) cs[x * height + y] = word.clue + "/" + clueSymbol;
+                cs[x * height + y] = word.clue;
+                if (x != 0) cs[x * height + y] += "/" + clueSymbol;
                 WriteWord(cs, word, x, y, directionHorizontal);
                 if (x + word.word.Length + 1 < width)
                 {
@@ -881,7 +880,7 @@ namespace BAK
                     cs[x * height + y + word.word.Length + 1] = clueSymbol;
                 }
                 //druhá část
-                length = secret.Substring(secret.Length / 2).Length;
+                length = secret.Substring(secret.Length / 2).Length - 1;
                 y = random.Next(0, height - length - 1);
                 if (y + word.word.Length == height - 3)
                 {
@@ -917,7 +916,7 @@ namespace BAK
         private void SetSecrets()
         {
             int side = Math.Max(width, height) - 1;
-            int secretLength = new Random().Next(width * height / 12, width * height / 8);
+            int secretLength = new Random().Next( side + side/2, (side * 2 - 4));
             if (secretLength == side - 2) secretLength++;
             foreach (string sec in dictionary.secretsList)
             {
@@ -1090,6 +1089,10 @@ namespace BAK
                         {
                             cs[x * height + y] = cs[x * height + y].Replace(clueSymbol, "");
                         }
+                        else if (IsClueForSecret(cs[(x + 1) * height + y]))
+                        {
+                            cs[x * height + y] = emptyField;
+                        }
                         else if (cs[(x - 1) * height + y] != emptyField)
                         {
                             cs[(x + 1) * height + y] = emptyField;
@@ -1099,7 +1102,7 @@ namespace BAK
                             cs[x * height + y] = emptyField;
                         }
                     }
-                    if (x != width - 1 && y + 1 < height && cs[x * height + y + 1] == emptyField)
+                    if (x != width - 1 && y + 1 < height && !IsClue(cs[x * height + y + 1]))
                     {
                         cs[x * height + y] += "/" + clueSymbol;
                     }
@@ -1416,7 +1419,7 @@ namespace BAK
             {
                 for (int x = 0; x < width; x += 1)
                 {
-                    if (cs[x * height + y].Contains("7"))
+                    if (cs[x * height + y].Contains("7") && !IsClueForSecret(cs[x * height + y]))
                     {
                         sb.Append(clueSymbol + " | ");
 

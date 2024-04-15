@@ -50,7 +50,7 @@ namespace BAK
                 while (reader.Read())
                 {
                     string secr = reader["secret"].ToString();
-                    secr = secr.Replace("'", "");
+                    secr = secr.Replace("’", "");
                     secretsList.Add(secr);
                     /*if (secr.Length >= maxLength * 1.5 && secr.Length < maxLength * 2.5)
                     {

@@ -46,7 +46,7 @@ namespace BAK
 
             InsertSecrets();
 
-            Console.WriteLine(LongestPossibleWord());
+             Console.WriteLine(LongestPossibleWord());
             dictionary = new Dictionary(longestWordLength);
             FillWithWords();
             To2DArray();
@@ -854,7 +854,7 @@ namespace BAK
                 //druhá část
                 length = secret.Substring(secret.Length / 2).Length;
                 x = random.Next(0, width - length - 1);
-                if (x + word.word.Length +1 == width - 3)
+                if (x + word.word.Length + 1 == width - 3)
                 {
                     x = width - length - 1;
                 }
@@ -1091,6 +1091,7 @@ namespace BAK
 
         void FinishingTouches()
         {
+            TestPrint(cs);
             for (int y = 1; y < height; y++)
             {
                 for (int x = 1; x < width; x++)
@@ -1110,12 +1111,16 @@ namespace BAK
                         {
                             cs[(x + 1) * height + y] = emptyField;
                         }
+                        else if (cs[x * height + y - 1] == placeholderSecretSymbol && cs[x * height + y - 2] == placeholderSecretSymbol)
+                        {
+
+                        }
                         else
                         {
                             cs[x * height + y] = emptyField;
                         }
                     }
-                   
+
                     if (x != width - 1 && y + 1 < height && !IsClue(cs[x * height + y + 1]))
                     {
                         cs[x * height + y] += "/" + clueSymbol;
@@ -1153,9 +1158,15 @@ namespace BAK
                     {
                         cs[x * height + y] = "/" + clue;
                     }
-                    if (y > 0 && x!=1 && cs[x * height + y - 1].Contains("/" + clueSymbol) && IsClue(cs[x * height + y]))
+                    if (y > 0 && x != 1 && x + 1 < width && cs[x * height + y - 1].Contains("/" + clueSymbol) && IsClue(cs[x * height + y])
+                        && !IsClueForSecret(cs[(x + 1) * height + y - 1]))
                     {
                         cs[x * height + y - 1] = cs[x * height + y - 1].Replace("/" + clueSymbol, "");
+                    }
+                    if (IsClueForSecret(cs[x * height + y]) && y < 0 && y < height - 1 &&
+                        (cs[x * height + y + 2].Contains("/" + clueSymbol) || cs[x * height + y + 1].Contains("/" + clueSymbol)))
+                    {
+                        cs[x * height + y] = cs[x * height + y].Replace("/" + clueSymbol, "");
                     }
                 }
             }
@@ -1368,7 +1379,7 @@ namespace BAK
             {
                 for (int x = 0; x < width; x++)
                 {
-                    if (!cs[x * height + y].Contains("clue")) continue;
+                    if (!cs[x * height + y].Contains(clue)) continue;
                     if (cs[x * height + y].Contains("/"))
                     {
                         containedLetters = ContainedLetters(cs, x, y, false);

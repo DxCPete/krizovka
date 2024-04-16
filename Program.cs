@@ -19,6 +19,9 @@ namespace BAK
       
 
             new CrosswordSw(20,21);
+            //občas to maže clueSymboly na konci slov, který jdou vertikálně
+
+            
             /*CrosswordSw cs;
             int celkovyPocetDeadEnd = 0;
             int celkovyPocetImpossiblePaths = 0;
@@ -27,7 +30,7 @@ namespace BAK
             int n = 1;
             for (int i = 0; i < n; i++)
             {
-                cs = new CrosswordSw(25,25);
+                cs = new CrosswordSw(15,15);
                 celkovyPocetDeadEnd += cs.ukoncenoNaDeadEnd;
                 celkovyPocetImpossiblePaths += cs.pocetNesplnitelnychCest;
                 celkovyPocetSlov += cs.pocetPouzitychSlov;

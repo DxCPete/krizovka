@@ -18,7 +18,7 @@ namespace BAK
         {
       
 
-            new CrosswordSw(20,21);
+            new CrosswordSw(15,15);
             //občas to maže clueSymboly na konci slov, který jdou vertikálně
 
             

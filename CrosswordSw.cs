@@ -46,7 +46,7 @@ namespace BAK
 
             InsertSecrets();
 
-             Console.WriteLine(LongestPossibleWord());
+            Console.WriteLine(LongestPossibleWord());
             dictionary = new Dictionary(longestWordLength);
             FillWithWords();
             To2DArray();
@@ -73,7 +73,7 @@ namespace BAK
                 x = coordinates.Item1;
                 if (x == -1)
                 {
-                    PismenaSedi(currentCs, usedWords);
+                    //PismenaSedi(currentCs, usedWords);
                     AverageWordLength(usedWords);
                     cs = currentCs;
                     this.usedWords = usedWords;
@@ -218,16 +218,16 @@ namespace BAK
             {
                 if (cs[x * height + y].Contains("/"))
                 {
-                    cs[x * height + y] = cs[x * height + y].Replace(clueSymbol + "/", clue + "/");
+                    cs[x * height + y] = cs[x * height + y].Replace(clueSymbol + "/", word.clue + "/");
                 }
                 else
                 {
-                    cs[x * height + y] = cs[x * height + y].Replace(clueSymbol, clue);
+                    cs[x * height + y] = cs[x * height + y].Replace(clueSymbol, word.clue);
                 }
             }
             else
             {
-                cs[x * height + y] = cs[x * height + y].Replace("/" + clueSymbol, "/" + clue);
+                cs[x * height + y] = cs[x * height + y].Replace("/" + clueSymbol, "/" + word.clue);
             }
             PrintCs(cs);
             return cs;
@@ -757,7 +757,12 @@ namespace BAK
 
         bool IsClue(string field)
         {
-            return field.Contains(clueSymbol) || field.Contains(clue);
+            return field.Contains(clueSymbol) || field.Contains(clue) || field.Length > 2;
+        }
+
+        bool IsCompletedClue(string field)
+        {
+            return field.Length > 2;
         }
 
         bool CrosswordContraintsComplied()
@@ -1389,10 +1394,11 @@ namespace BAK
                         }
                         else
                         {
-
+                            Console.WriteLine("Nesedí: " + x + " " + y + " " + false);
                         }
                     }
-                    if (cs[x * height + y] == "clue" || cs[x * height + y] == "clue/clue")
+                    if (IsCompletedClue(cs[x * height + y]) ||
+                        (IsCompletedClue(cs[x * height + y]) && cs[x * height + y].Substring(0, cs[x * height + y].IndexOf("/")).Length > 2))
                     {
                         containedLetters = ContainedLetters(cs, x, y, true);
                         if (ExistujeSlovo(usedWords, containedLetters))
@@ -1401,7 +1407,7 @@ namespace BAK
                         }
                         else
                         {
-
+                            Console.WriteLine("Nesedí: " + x + " " + y + " " + true);
                         }
                     }
                 }

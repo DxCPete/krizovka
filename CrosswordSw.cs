@@ -26,6 +26,8 @@ namespace BAK
         public int pocetNesplnitelnychCest = 0;
         public int pocetPouzitychSlov = 0;
 
+        public bool isFinished = false;
+
 
         public CrosswordSw(int x, int y) : base(x, y)
         {
@@ -40,7 +42,7 @@ namespace BAK
             {
                 InitCrosswordContraints();
                 longestWordLength = LongestPossibleWord();
-            } while (!CrosswordContraintsComplied() || longestWordLength >= 9);
+            } while (!CrosswordContraintsComplied() || longestWordLength >= 11);
 
             TestPrint(cs);
 
@@ -50,6 +52,12 @@ namespace BAK
             dictionary = new Dictionary(longestWordLength);
             FillWithWords();
             To2DArray();
+            if (!isFinished)
+            {
+                Crossword csNew = new CrosswordSw(width, height);
+                this.crossword = csNew.crossword;
+                this.usedWords = csNew.usedWords;
+            }
         }
 
 
@@ -61,9 +69,13 @@ namespace BAK
             int x;
             int y;
             bool horizontalDirection;
-
+            int maxSide = Math.Max(width, height);
             while (stack.Count > 0)
             {
+                if(counterTest > maxSide * 2000)
+                {
+                    return;
+                }
                 (string[], List<Word>) st = stack.Pop();
                 string[] currentCs = st.Item1;
                 PrintCs(currentCs);
@@ -77,6 +89,7 @@ namespace BAK
                     AverageWordLength(usedWords);
                     cs = currentCs;
                     this.usedWords = usedWords;
+                    isFinished = true;
                     return;
                 }
                 y = coordinates.Item2;
@@ -111,8 +124,8 @@ namespace BAK
                         pocetNesplnitelnychCest++;
                         containedLetters = GetMinimalImposibilePath(containedLetters);
                         impossiblePathsList[x][y].Add((containedLetters, horizontalDirection));
-                        lastDeadEndedCoordinates = (x, y, horizontalDirection);
                     }
+                    lastDeadEndedCoordinates = (x, y, horizontalDirection);
                 }
             }
         }
@@ -772,13 +785,13 @@ namespace BAK
                 for (int x = 0; x < width; x++)
                 {
                     if (!cs[x * height + y].Contains(clueSymbol)) continue;
-                    if ((y != 0 && x + 2 < width && cs[(x + 2) * height + y].Contains(clueSymbol))
+                    if ((y != 0 && x + 2 < width && IsClue(cs[(x + 2) * height + y]))
                         || (x == width - 2 && !IsClue(cs[(x + 1) * height + y])))//existuje místo pro slovo délky 1
                     {
                         Console.WriteLine(x + " " + y);
                         return false;
                     }
-                    if ((x != 0 && y + 2 < height && cs[x * height + y + 2].Contains(clueSymbol))
+                    if ((x != 0 && y + 2 < height && IsClue(cs[x * height + y + 2]))
                         || (y == height - 2 && !IsClue(cs[x * height + y + 1]))) //existuje místo pro slovo délky 1
                     {
                         Console.WriteLine(x + " " + y);
@@ -1179,17 +1192,17 @@ namespace BAK
 
         void PrintCs(string[] cs)
         {
-            StringBuilder sb = new StringBuilder();
+          /*  StringBuilder sb = new StringBuilder();
             for (int y = 0; y < height; y += 1)
             {
                 for (int x = 0; x < width; x += 1)
                 {
-                    sb.Append(cs[x * height + y]/*.Replace("7/7", "7").Replace("/7", "7")*/ + " | ");
+                    sb.Append(cs[x * height + y]+ " | ");
                 }
 
                 sb.AppendLine();
             }
-            Console.WriteLine(sb.ToString());
+            Console.WriteLine(sb.ToString());*/
         }
 
         public void PrintMainCs()
@@ -1449,7 +1462,7 @@ namespace BAK
 
         void TestPrint(String[] cs)
         {
-            StringBuilder sb = new StringBuilder();
+           /* StringBuilder sb = new StringBuilder();
             for (int y = 0; y < height; y += 1)
             {
                 for (int x = 0; x < width; x += 1)
@@ -1467,7 +1480,7 @@ namespace BAK
 
                 sb.AppendLine();
             }
-            Console.WriteLine(sb.ToString());
+            Console.WriteLine(sb.ToString());*/
         }
     }
 }

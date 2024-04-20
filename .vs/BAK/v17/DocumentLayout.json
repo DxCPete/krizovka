@@ -3,12 +3,20 @@
   "WorkspaceRootPath": "C:\\Users\\Pete\\OneDrive\\Desktop\\todo\\K-ovka\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{5FDA5D59-D242-484A-94F7-975BC34065A3}|BAK.csproj|C:\\Users\\Pete\\OneDrive\\Desktop\\todo\\K-ovka\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{5FDA5D59-D242-484A-94F7-975BC34065A3}|BAK.csproj|c:\\users\\pete\\onedrive\\desktop\\todo\\k-ovka\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5FDA5D59-D242-484A-94F7-975BC34065A3}|BAK.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5FDA5D59-D242-484A-94F7-975BC34065A3}|BAK.csproj|c:\\users\\pete\\onedrive\\desktop\\todo\\k-ovka\\crosswordsw.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{5FDA5D59-D242-484A-94F7-975BC34065A3}|BAK.csproj|C:\\Users\\Pete\\OneDrive\\Desktop\\todo\\K-ovka\\crosswordsw.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5FDA5D59-D242-484A-94F7-975BC34065A3}|BAK.csproj|solutionrelative:crosswordsw.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5FDA5D59-D242-484A-94F7-975BC34065A3}|BAK.csproj|C:\\Users\\Pete\\OneDrive\\Desktop\\todo\\K-ovka\\crosswordbritish.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5FDA5D59-D242-484A-94F7-975BC34065A3}|BAK.csproj|solutionrelative:crosswordbritish.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5FDA5D59-D242-484A-94F7-975BC34065A3}|BAK.csproj|c:\\users\\pete\\onedrive\\desktop\\todo\\k-ovka\\crossword.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5FDA5D59-D242-484A-94F7-975BC34065A3}|BAK.csproj|solutionrelative:crossword.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{5FDA5D59-D242-484A-94F7-975BC34065A3}|BAK.csproj|C:\\Users\\Pete\\OneDrive\\Desktop\\todo\\K-ovka\\dictionary.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -22,8 +30,34 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 4,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Crossword.cs",
+              "DocumentMoniker": "C:\\Users\\Pete\\OneDrive\\Desktop\\todo\\K-ovka\\Crossword.cs",
+              "RelativeDocumentMoniker": "Crossword.cs",
+              "ToolTip": "C:\\Users\\Pete\\OneDrive\\Desktop\\todo\\K-ovka\\Crossword.cs",
+              "RelativeToolTip": "Crossword.cs",
+              "ViewState": "AQIAAAQAAAAAAAAAAAAMwAoAAAAwAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-20T11:36:09.872Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "CrosswordBritish.cs",
+              "DocumentMoniker": "C:\\Users\\Pete\\OneDrive\\Desktop\\todo\\K-ovka\\CrosswordBritish.cs",
+              "RelativeDocumentMoniker": "CrosswordBritish.cs",
+              "ToolTip": "C:\\Users\\Pete\\OneDrive\\Desktop\\todo\\K-ovka\\CrosswordBritish.cs",
+              "RelativeToolTip": "CrosswordBritish.cs",
+              "ViewState": "AQIAAGAAAAAAAAAAAAAawGwAAAAwAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-20T08:40:51.054Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Document",
               "DocumentIndex": 1,
@@ -32,23 +66,22 @@
               "RelativeDocumentMoniker": "CrosswordSw.cs",
               "ToolTip": "C:\\Users\\Pete\\OneDrive\\Desktop\\todo\\K-ovka\\CrosswordSw.cs",
               "RelativeToolTip": "CrosswordSw.cs",
-              "ViewState": "AQIAAJ8DAAAAAAAAAAASwLUDAABRAAAA",
+              "ViewState": "AQIAADEAAAAAAAAAAAAQwDYAAAAcAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-03-15T15:12:50.259Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "Dictionary.cs",
               "DocumentMoniker": "C:\\Users\\Pete\\OneDrive\\Desktop\\todo\\K-ovka\\Dictionary.cs",
               "RelativeDocumentMoniker": "Dictionary.cs",
               "ToolTip": "C:\\Users\\Pete\\OneDrive\\Desktop\\todo\\K-ovka\\Dictionary.cs",
               "RelativeToolTip": "Dictionary.cs",
-              "ViewState": "AQIAACMAAAAAAAAAAAAAwC8AAABAAAAA",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABMAAACeAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-02-28T10:06:34.755Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-02-28T10:06:34.755Z"
             },
             {
               "$type": "Document",
@@ -58,7 +91,7 @@
               "RelativeDocumentMoniker": "Program.cs",
               "ToolTip": "C:\\Users\\Pete\\OneDrive\\Desktop\\todo\\K-ovka\\Program.cs",
               "RelativeToolTip": "Program.cs",
-              "ViewState": "AQIAAA0AAAAAAAAAAAAiwBMAAAAAAAAA",
+              "ViewState": "AQIAAA4AAAAAAAAAAAAswBYAAAAIAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-02-24T09:31:04.008Z",
               "EditorCaption": ""

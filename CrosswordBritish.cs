@@ -7,13 +7,18 @@ namespace BAK
 {
     class CrosswordBritish : Crossword
     {
-        double bestScore = 0.0;
-        double lastScore = 0.0;
-        double minimumRequiredScore;
+        protected double bestScore = 0.0;
+        protected double lastScore = 0.0;
+        protected double minimumRequiredScore;
+
+
+
+        public string[] cluesHorizontal;
+        public string[] cluesVertical;
 
         public CrosswordBritish(int x, int y) : base(x, y)
         {
-            PrintClues();
+            SetClues();
         }
 
         public override void Generate()
@@ -102,14 +107,12 @@ namespace BAK
                 }
             }
             double filledRatio = filled / empty;
-
             return 10 * sizeRatio + filledRatio * 20;
         }
 
         public (string[,], List<Word>) FixCrossing(string[,] cs, List<Word> usedWords)
         {
-            Console.WriteLine("fixing crossing");
-            PrintCs(cs);
+            //PrintCs(cs);
             bool changed = false;
             for (int y = 0; y < height; y++)
             {
@@ -140,7 +143,7 @@ namespace BAK
                     }
                 }
             }
-            PrintCs(cs);
+           // PrintCs(cs);
             if (changed)
             {
                 double score = GetScore(cs);
@@ -151,95 +154,17 @@ namespace BAK
                 }
                 if (score < minimumRequiredScore && width * height > 9)
                 {
-                    /*                    (string[,], List<Word>, int, int) t = FixBigSpaces(cs, usedWords);
-                                        cs = t.Item1;
-                                        usedWords = t.Item2;
-                                        int x = t.Item3;
-                                        int y = t.Item4;
-                                        if (x < 0) return (cs, usedWords);*/
                     cs = GenerateCrossword(cs);
                 }
             }
             return (cs, usedWords);
         }
 
-        /* (string[,], List<Word>, int, int) FixBigSpaces(string[,] cs, List<Word> usedWords)
-         {
-             for (int y = 0; y < height; y++)
-             {
-                 for (int x = 0; x < width; x++)
-                 {
-                     (int, int, int) t = ContainsBigSpace(cs, x, y);
-                     if (t.Item1 > -1)
-                     {
-                         x = t.Item1;
-                         y = t.Item2;
-                         int length = t.Item3;
-                         if (length > 4)
-                         {
-                             bool horizontalDirection = true;
-                             string[] containedLetters = ContainedLetters(cs, x, y, horizontalDirection);
-                             Word wordNew = dictionary.SelectWord(containedLetters, usedWords, length);
-                             if (!wordNew.word.Equals("") && CanPlace(cs, wordNew, x, y, horizontalDirection))
-                             {
-                                 WordWrite(cs, wordNew, x, y, horizontalDirection);
-                                 usedWords.Add(wordNew);
-                                 return (cs, usedWords, x, y);
-                             }
-                         }
-                     }
-                 }
-             }
-
-             return (cs, usedWords, -1, -1);
-         }
-
-
-         (int, int, int) ContainsBigSpace(string[,] cs, int x, int y)
-         {
-             int bigSpaceX = 3;
-             int bigSpaceY = 3;
-             for (; y < height - bigSpaceY; y++)
-             {
-                 for (; x < width - bigSpaceX; x++)
-                 {
-                     if (cs[x, y] != " ") continue;
-                     bool containsBigSpace = true;
-                     for (int i = 1; i <= bigSpaceX; i++)
-                     {
-                         if (!(y < height - 2 && cs[x + i, y] == " " && cs[x + i, y + 1] == " " && cs[x + i, y + 2] == " "))
-                         {
-                             containsBigSpace = false;
-                             break;
-                         }
-                     }
-                     if (containsBigSpace)
-                     {
-
-                         return (x, y, BigSpaceLength(cs, x, y));
-                     }
-                 }
-             }
-             return (-1, -1, -1);
-         }*/
-
-
-        int BigSpaceLength(string[,] cs, int x, int y)
-        {
-            int i = 0;
-            while (x + i < height && cs[x + i, y] == " ")
-            {
-                i++;
-            }
-            return i;
-        }
-
-
         public string[] ContainedLetters(string[,] cs, int x, int y, bool horintalDirection)
         {
             string[] pismena;
             int i = 0;
-            Regex regex = new Regex(@"[\p{Lu}\p{L}ÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]");
+            Regex regex = new Regex(regexString);
             if (horintalDirection)
             {
                 pismena = new string[width - x];
@@ -252,10 +177,6 @@ namespace BAK
                     else if (cs[x + i, y] == " ")
                     {
                         pismena[i] = "_";
-                    }
-                    else if (cs[x + i, y].Contains("7") || cs[x + i, y].Contains("clue"))
-                    {
-                        break;
                     }
                     else
                     {
@@ -276,10 +197,6 @@ namespace BAK
                     else if (cs[x, y + i] == " ")
                     {
                         pismena[i] = "_";
-                    }
-                    else if (cs[x, y + i].Contains("7") || cs[x, y + i].Contains("clue"))
-                    {
-                        break;
                     }
                     else
                     {
@@ -312,9 +229,6 @@ namespace BAK
             }
         }
 
-        public override void ClueWrite(Word word, int x, int y, bool horintalDirection)
-        {
-        }
 
         public bool CanPlace(string[,] cs, Word word, int x, int y, bool horintalDirection)
         {
@@ -468,25 +382,29 @@ namespace BAK
             }
         }
 
-        void PrintClues()
+        void SetClues()
         {
-            (List<Word>, List<Word>) t = GetCluesInRightDirection();
+            (List<Word>, List<Word>) t = GetCluesInRightDirectionAndOrder();
             List<Word> clueHorizontal = t.Item1;
             List<Word> clueVertical = t.Item2;
             Console.WriteLine("Legenda");
             Console.WriteLine("Vodorovná: ");
+            cluesHorizontal = new string[clueHorizontal.Count];
             for (int i = 0; i < clueHorizontal.Count; i++)
             {
-                Console.WriteLine(clueHorizontal[i].clue);
+                cluesHorizontal[i] = clueHorizontal[i].clue;
+                Console.WriteLine(cluesHorizontal[i]);
             }
             Console.WriteLine("Svislá: ");
+            cluesVertical = new string[clueVertical.Count];
             for (int i = 0; i < clueVertical.Count; i++)
             {
-                Console.WriteLine(clueVertical[i].clue);
+                cluesVertical[i] = clueVertical[i].clue;
+                Console.WriteLine(cluesVertical[i]);
             }
         }
 
-        public (List<Word>, List<Word>) GetCluesInRightDirection()
+        public (List<Word>, List<Word>) GetCluesInRightDirectionAndOrder()
         {
             List<Word> cluesHorizontal = new List<Word>();
             List<Word> cluesVertical = new List<Word>();

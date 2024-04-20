@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 
 namespace BAK
 {
@@ -13,12 +11,13 @@ namespace BAK
         public string[,] crossword { get; set; }
         public int width { get; set; }
         public int height { get; set; }
-        public Dictionary dictionary;
+        protected Dictionary dictionary;
         public List<Word> usedWords = new List<Word>();
         public string language { get; set; }
         public int difficulty { get; set; }
-        public List<(string[] containedLetters, bool horizontalDirection)>[][] impossiblePathsList;
-        public string emptyField = " ";
+        protected List<(string[] containedLetters, bool horizontalDirection)>[][] impossiblePathsList;
+        protected string emptyField = " ";
+        protected string regexString = @"[\p{Lu}\p{L}ÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]";
 
 
         public Crossword(int width, int height)   //pak přidat jazyk
@@ -60,7 +59,7 @@ namespace BAK
         {
             string[] pismena = new string[maxLength];
             int i = 0;
-            Regex regex = new Regex(@"[\p{Lu}\p{L}ÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]");
+            Regex regex = new Regex(regexString);
             if (horintalDirection)
             {
                 while (i < maxLength)

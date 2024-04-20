@@ -16,6 +16,7 @@ namespace BAK
         public int difficulty { get; set; } = 1;
         private WordComparer comparer { get; } = new WordComparer();
         static string currentDirectory = System.Environment.CurrentDirectory;
+        static string basePath = AppDomain.CurrentDomain.BaseDirectory + "Models\\";
         private string conStr = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=\"" + currentDirectory.Substring(0, currentDirectory.LastIndexOf("bin")) + "Directory.mdf\";Integrated Security=True"; //bude potřeba změnit, když přesunu soubor
         int limit = 150;
 

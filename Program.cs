@@ -18,7 +18,7 @@ namespace BAK
         static void Main(string[] args)
         {
 
-            new CrosswordSw(20,20);
+            new CrosswordBritish(15,15, true);
 
         }
     }

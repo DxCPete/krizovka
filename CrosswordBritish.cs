@@ -16,7 +16,7 @@ namespace BAK
         public string[] cluesHorizontal;
         public string[] cluesVertical;
 
-        public CrosswordBritish(int x, int y) : base(x, y)
+        public CrosswordBritish(int x, int y, bool isCzechLanguage) : base(x, y, isCzechLanguage)
         {
             SetClues();
         }
@@ -432,9 +432,6 @@ namespace BAK
             }
             return (cluesHorizontal, cluesVertical);
         }
-
-
-
 
         public Word FindWord(int x, int y, bool horizontalDir)
         {

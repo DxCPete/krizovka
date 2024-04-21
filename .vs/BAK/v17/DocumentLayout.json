@@ -7,20 +7,20 @@
       "RelativeMoniker": "D:0:0:{5FDA5D59-D242-484A-94F7-975BC34065A3}|BAK.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{5FDA5D59-D242-484A-94F7-975BC34065A3}|BAK.csproj|C:\\Users\\Pete\\OneDrive\\Desktop\\todo\\K-ovka\\crossword.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5FDA5D59-D242-484A-94F7-975BC34065A3}|BAK.csproj|solutionrelative:crossword.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5FDA5D59-D242-484A-94F7-975BC34065A3}|BAK.csproj|C:\\Users\\Pete\\OneDrive\\Desktop\\todo\\K-ovka\\dictionary.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5FDA5D59-D242-484A-94F7-975BC34065A3}|BAK.csproj|solutionrelative:dictionary.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{5FDA5D59-D242-484A-94F7-975BC34065A3}|BAK.csproj|C:\\Users\\Pete\\OneDrive\\Desktop\\todo\\K-ovka\\crosswordsw.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5FDA5D59-D242-484A-94F7-975BC34065A3}|BAK.csproj|solutionrelative:crosswordsw.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{5FDA5D59-D242-484A-94F7-975BC34065A3}|BAK.csproj|C:\\Users\\Pete\\OneDrive\\Desktop\\todo\\K-ovka\\crosswordbritish.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5FDA5D59-D242-484A-94F7-975BC34065A3}|BAK.csproj|solutionrelative:crosswordbritish.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5FDA5D59-D242-484A-94F7-975BC34065A3}|BAK.csproj|c:\\users\\pete\\onedrive\\desktop\\todo\\k-ovka\\crossword.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5FDA5D59-D242-484A-94F7-975BC34065A3}|BAK.csproj|solutionrelative:crossword.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5FDA5D59-D242-484A-94F7-975BC34065A3}|BAK.csproj|C:\\Users\\Pete\\OneDrive\\Desktop\\todo\\K-ovka\\dictionary.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5FDA5D59-D242-484A-94F7-975BC34065A3}|BAK.csproj|solutionrelative:dictionary.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -34,54 +34,55 @@
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 1,
               "Title": "Crossword.cs",
               "DocumentMoniker": "C:\\Users\\Pete\\OneDrive\\Desktop\\todo\\K-ovka\\Crossword.cs",
               "RelativeDocumentMoniker": "Crossword.cs",
               "ToolTip": "C:\\Users\\Pete\\OneDrive\\Desktop\\todo\\K-ovka\\Crossword.cs",
               "RelativeToolTip": "Crossword.cs",
-              "ViewState": "AQIAAAQAAAAAAAAAAAAMwAoAAAAwAAAA",
+              "ViewState": "AQIAAFoAAAAAAAAAAAAvwGcAAAAUAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-04-20T11:36:09.872Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "CrosswordBritish.cs",
               "DocumentMoniker": "C:\\Users\\Pete\\OneDrive\\Desktop\\todo\\K-ovka\\CrosswordBritish.cs",
               "RelativeDocumentMoniker": "CrosswordBritish.cs",
               "ToolTip": "C:\\Users\\Pete\\OneDrive\\Desktop\\todo\\K-ovka\\CrosswordBritish.cs",
               "RelativeToolTip": "CrosswordBritish.cs",
-              "ViewState": "AQIAAGAAAAAAAAAAAAAawGwAAAAwAAAA",
+              "ViewState": "AQIAAKwBAAAAAAAAAAAIwK4BAAARAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-04-20T08:40:51.054Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "CrosswordSw.cs",
               "DocumentMoniker": "C:\\Users\\Pete\\OneDrive\\Desktop\\todo\\K-ovka\\CrosswordSw.cs",
               "RelativeDocumentMoniker": "CrosswordSw.cs",
               "ToolTip": "C:\\Users\\Pete\\OneDrive\\Desktop\\todo\\K-ovka\\CrosswordSw.cs",
               "RelativeToolTip": "CrosswordSw.cs",
-              "ViewState": "AQIAADEAAAAAAAAAAAAQwDYAAAAcAAAA",
+              "ViewState": "AQIAABoAAAAAAAAAAAAxwCQAAAANAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-03-15T15:12:50.259Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 2,
               "Title": "Dictionary.cs",
               "DocumentMoniker": "C:\\Users\\Pete\\OneDrive\\Desktop\\todo\\K-ovka\\Dictionary.cs",
               "RelativeDocumentMoniker": "Dictionary.cs",
               "ToolTip": "C:\\Users\\Pete\\OneDrive\\Desktop\\todo\\K-ovka\\Dictionary.cs",
               "RelativeToolTip": "Dictionary.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAABMAAACeAAAA",
+              "ViewState": "AQIAACsAAAAAAAAAAAAvwDgAAAAMAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-02-28T10:06:34.755Z"
+              "WhenOpened": "2024-02-28T10:06:34.755Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -91,7 +92,7 @@
               "RelativeDocumentMoniker": "Program.cs",
               "ToolTip": "C:\\Users\\Pete\\OneDrive\\Desktop\\todo\\K-ovka\\Program.cs",
               "RelativeToolTip": "Program.cs",
-              "ViewState": "AQIAAA4AAAAAAAAAAAAswBYAAAAIAAAA",
+              "ViewState": "AQIAAA8AAAAAAAAAAAAkwBkAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-02-24T09:31:04.008Z",
               "EditorCaption": ""

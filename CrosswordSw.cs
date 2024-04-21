@@ -21,9 +21,10 @@ namespace BAK
         protected int pocetPouzitychSlov = 0;
 
         protected bool isFinished = false;
+        private string secretPart1;
+        private string secretPart2;
 
-
-        public CrosswordSw(int x, int y) : base(x, y)
+        public CrosswordSw(int x, int y, bool isCzechLanguage) : base(x, y,  isCzechLanguage)
         {
         }
 
@@ -38,12 +39,12 @@ namespace BAK
                 longestWordLength = LongestPossibleWord();
             } while (!CrosswordContraintsComplied() || longestWordLength >= 9);
             InsertSecrets();
-            dictionary = new Dictionary(longestWordLength);
+            dictionary = new Dictionary(longestWordLength, isCzechLanguage, difficulty);
             FillWithWords();
             To2DArray();
             if (!isFinished)
             {
-                Crossword csNew = new CrosswordSw(width, height);
+                Crossword csNew = new CrosswordSw(width, height, isCzechLanguage);
                 this.crossword = csNew.crossword;
                 this.usedWords = csNew.usedWords;
             }
@@ -85,7 +86,7 @@ namespace BAK
                     continue;
                 }
                 string[] containedLetters = ContainedLetters(currentCs, x, y, horizontalDirection);
-                List<Word> possibleWords = dictionary.SelectWordsNew(usedWords, containedLetters);
+                List<Word> possibleWords = dictionary.SelectWordsLengthSensitive(usedWords, containedLetters);
                 foreach (Word word in possibleWords)
                 {
                     pocetPouzitychSlov++;
@@ -173,7 +174,7 @@ namespace BAK
             int count = 0;
             for (int i = 0; i < containedLetters.Length; i++)
             {
-                if (Char.IsLetter(char.Parse(containedLetters[i])))
+                if (Char.IsLetter(char.Parse(containedLetters[i])) || containedLetters[i] == chPlaceholder)
                 {
                     count++;
                 }
@@ -556,9 +557,9 @@ namespace BAK
             foreach (string secret in secrets)
             {
                 string[] csClone = (string[])cs.Clone();
-                Word word = new Word(secret.Substring(0, secret.Length / 2), "taj1");
+                Word word = new Word(secret.Substring(0, secret.Length / 2), secretPart1);
                 WriteWord(csClone, word, coords[0].Item1, coords[0].Item2, coords[0].Item3);
-                word = new Word(secret.Substring(secret.Length / 2), "taj2");
+                word = new Word(secret.Substring(secret.Length / 2), secretPart2);
                 WriteWord(csClone, word, coords[1].Item1, coords[1].Item2, coords[1].Item3);
                 PrintCs(csClone);
                 stack.Push((csClone, new List<Word>()));
@@ -567,7 +568,7 @@ namespace BAK
 
         bool IsClueForSecret(string field)
         {
-            return field.Contains("taj");
+            return field.Contains(secretPart1) || field.Contains(secretPart2);
         }
 
         bool IsClue(string field)
@@ -636,7 +637,7 @@ namespace BAK
             if (directionHorizontal)
             {
                 y = random.Next(3, 6);
-                Word word = new Word(CreateSecretPlaceholder(length), "taj1");
+                Word word = new Word(CreateSecretPlaceholder(length), secretPart1);
                 if (word.word.Length == width - 3)
                 {
                     x = width - length - 1;
@@ -664,7 +665,7 @@ namespace BAK
                 {
                     cs[(x - 1) * height + y] = clueSymbol;
                 }
-                word = new Word(CreateSecretPlaceholder(length), "taj2");
+                word = new Word(CreateSecretPlaceholder(length), secretPart2);
                 cs[x * height + y] = word.clue;
                 if (x != 0) cs[x * height + y] += "/" + clueSymbol;
                 WriteWord(cs, word, x, y, directionHorizontal);
@@ -676,7 +677,7 @@ namespace BAK
             else
             {
                 x = random.Next(3, 6);
-                Word word = new Word(CreateSecretPlaceholder(length), "taj1");
+                Word word = new Word(CreateSecretPlaceholder(length), secretPart1);
                 if (word.word.Length == height - 3)
                 {
                     y = Math.Max(width, height) - length - 1;
@@ -704,7 +705,7 @@ namespace BAK
                     cs[x * height + y - 1] = clueSymbol;
                 }
                 x = random.Next(7, width - 3);
-                word = new Word(CreateSecretPlaceholder(length), "taj2");
+                word = new Word(CreateSecretPlaceholder(length), secretPart2);
                 cs[x * height + y] = "/" + word.clue;
                 if (y != 0) cs[x * height + y] = clueSymbol + "/" + word.clue;
                 WriteWord(cs, word, x, y, directionHorizontal);
@@ -740,17 +741,26 @@ namespace BAK
                 }
             }
             if (secrets.Count == 0) SetSecrets();
+            if (isCzechLanguage)
+            {
+                secretPart1 = "TAJENKA 1";
+                secretPart2 = "TAJENKA 2";
+            }
+            else
+            {
+                secretPart1 = "SECRET 1";
+                secretPart2 = "SECRET 2";
+            }
         }
 
 
         public void AddSecret()
         {
-            //select tajenka
             List<string> secret = GetSecret();
             Random random = new Random();
             int x = 0;
             int y = 3;
-            Word word = new Word(secret[0], "taj1");
+            Word word = new Word(secret[0], secretPart1);
             cs[x * height + y] = clueSymbol;
             WriteWord(cs, word, x, y, true);
             if (x + word.word.Length + 1 < width)
@@ -758,7 +768,7 @@ namespace BAK
                 cs[(x + word.word.Length + 1) * height + y] = clueSymbol;
             }
             PrintMainCs();
-            word = new Word(secret[1], "taj2");
+            word = new Word(secret[1], secretPart2);
             if (secret[1].Length < height - y)
             {
                 x = random.Next(3, width - 2);
@@ -790,49 +800,6 @@ namespace BAK
             PrintMainCs();
 
             if (secret.Count < 3) return;
-
-            word = new Word(secret[2], "taj3");
-            if (x == 0)
-            {
-                while (true)
-                {
-                    y = random.Next(3, height - 2);
-                    if (cs[x * height + y - 1] != emptyField) y += 1;
-                    else if (cs[x * height + y] != emptyField) y += 2;
-                    else if (cs[x * height + y + 1] != emptyField) y += 3;
-                    else break;
-                }
-                cs[x * height + y] = clueSymbol;
-                WriteWord(cs, word, x, y, true);
-                if (x + word.word.Length + 1 < width)
-                {
-                    cs[(x + word.word.Length + 1) * height + y] = clueSymbol;
-                }
-
-            }
-            else
-            {
-                int len = y + secret[2].Length;
-                if (len > height - 1)
-                {
-                    y = height - 1 - len;
-                }
-                while (true)
-                {
-                    x = random.Next(3, width - 2);
-                    if (cs[(x - 1) * height + y] != emptyField || cs[x * height + y] != emptyField
-                        || (x + 1 < width && cs[(x + 1) * height + y] != emptyField)) continue;
-                    if (cs[x * height + y] != emptyField) continue;
-                    if (x == width - 1) x = width - 2;
-                    cs[x * height + y] = clueSymbol + "/" + clueSymbol;
-                    WriteWord(cs, word, x, y, false);
-                    if (y + word.word.Length + 1 < height)
-                    {
-                        cs[x * height + y + word.word.Length + 1] = clueSymbol;
-                    }
-                    break;
-                }
-            }
             PrintMainCs();
 
         }
@@ -968,7 +935,7 @@ namespace BAK
 
         void PrintCs(string[] cs)
         {
-            /*  StringBuilder sb = new StringBuilder();
+              StringBuilder sb = new StringBuilder();
               for (int y = 0; y < height; y += 1)
               {
                   for (int x = 0; x < width; x += 1)
@@ -978,7 +945,7 @@ namespace BAK
 
                   sb.AppendLine();
               }
-              Console.WriteLine(sb.ToString());*/
+              Console.WriteLine(sb.ToString());
         }
 
         public void PrintMainCs()

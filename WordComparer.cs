@@ -43,7 +43,7 @@ namespace BAK
         }
 
 
-        public bool EqualsNew(Word candidate, Word obsahuje)
+        public bool EqualsLengthSensitive(Word candidate, Word obsahuje)
         {
             if (candidate.word.Equals(obsahuje.word))
             {
@@ -89,7 +89,7 @@ namespace BAK
 
             int i = 0;
             //Console.WriteLine(candidate.word);
-            while (i < n && char.IsLetter(candidate.word[i]))
+            while (i < n && (char.IsLetter(candidate.word[i]) || candidate.word[i] == '6'))
             {
                 // Console.WriteLine(candidate.word[i].ToString() + " " + wordContains[i]);
                 if (candidate.word[i].ToString() != wordContains[i] && (wordContains[i] != "_" || wordContains[i] == " "))
